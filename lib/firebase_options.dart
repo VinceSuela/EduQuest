@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'eduquest-a2922.firebaseapp.com',
     storageBucket: 'eduquest-a2922.firebasestorage.app',
   );
+
 }

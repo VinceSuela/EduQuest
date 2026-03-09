@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
     return SignInForm(
       submitLabel: 'Sign Up',
       onSignIn: (email, password) {
-        signIn(context, email, password);
+        signUp(context, email, password);
       },
       child: Column(
         children: [

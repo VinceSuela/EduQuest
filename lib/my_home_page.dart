@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/counter.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
@@ -57,6 +58,7 @@ class MyHomePage extends StatelessWidget {
             MyButton(
               label: 'Sample answer here.',
               onPressed: () {
+                FirebaseAuth.instance.signOut();
                 Navigator.pushNamed(context, '/login');
               },
               isActive: false,
