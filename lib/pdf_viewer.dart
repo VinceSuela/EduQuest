@@ -1,10 +1,11 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
-import 'package:flutter_pomodoro/providers/user.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_platform/universal_platform.dart';
 
 class PinchPage extends StatefulWidget {
   const PinchPage({Key? key}) : super(key: key);
@@ -17,18 +18,34 @@ enum DocShown { sample, tutorial, hello, password }
 
 class _PinchPageState extends State<PinchPage> {
   static const int _initialPage = 1;
-  DocShown _showing = DocShown.sample;
   late PdfControllerPinch _pdfControllerPinch;
+  late PdfDocument pdfDoc;
 
   @override
   void initState() {
-    _pdfControllerPinch = PdfControllerPinch(
-      // document: PdfDocument.openAsset('assets/hello.pdf'),
-      document: PdfDocument.openFile(
-        Provider.of<MyFile>(NavigationService.navigatorKey.currentContext!).path
-      ),
-      initialPage: _initialPage,
-    );
+    if (kIsWeb) {
+      _pdfControllerPinch = PdfControllerPinch(
+        // document: PdfDocument.openAsset('assets/hello.pdf'),
+        document: PdfDocument.openData(
+          Provider.of<MyFile>(
+                NavigationService.navigatorKey.currentContext!,
+              ).bytes
+              as FutureOr<Uint8List>,
+        ),
+        initialPage: _initialPage,
+      );
+    } else {
+      _pdfControllerPinch = PdfControllerPinch(
+        // document: PdfDocument.openAsset('assets/hello.pdf'),
+        document: PdfDocument.openFile(
+          Provider.of<MyFile>(
+            NavigationService.navigatorKey.currentContext!,
+          ).path,
+        ),
+        initialPage: _initialPage,
+      );
+    }
+
     super.initState();
   }
 

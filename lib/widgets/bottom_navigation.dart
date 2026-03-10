@@ -74,7 +74,7 @@ class ReviewQuizes extends StatelessWidget {
         onTap: () {},
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset('asset/images/review-button.png'),
+          child: Image.asset('assets/images/review-button.png'),
         ),
       ),
     );
@@ -94,7 +94,10 @@ class GenerateQuiz extends StatelessWidget {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset('asset/images/generate-button.png', fit: .contain),
+          child: Image.asset(
+            'assets/images/generate-button.png',
+            fit: .contain,
+          ),
         ),
       ),
     );
@@ -124,7 +127,7 @@ class _StartLearningState extends State<StartLearning> {
           );
 
           if (result != null) {
-            File file = File(result.files.single.path!);
+            PlatformFile file = result.files.single;
             Provider.of<MyFile>(
               NavigationService.navigatorKey.currentContext!,
               listen: false,
@@ -139,7 +142,7 @@ class _StartLearningState extends State<StartLearning> {
         },
         child: Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
-          child: Image.asset('asset/images/start-button.png'),
+          child: Image.asset('assets/images/start-button.png'),
         ),
       ),
     );
