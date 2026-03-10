@@ -33,7 +33,7 @@ class MyLayout extends StatelessWidget {
                 width: .infinity,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('asset/images/bg.png'),
+                    image: AssetImage('assets/images/bg.png'),
                     fit: .cover,
                     alignment: .topCenter,
                   ),

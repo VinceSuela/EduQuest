@@ -7,6 +7,9 @@ import 'package:flutter_pomodoro/friends_page.dart';
 import 'package:flutter_pomodoro/login_page.dart';
 import 'package:flutter_pomodoro/my_home_page.dart';
 import 'package:flutter_pomodoro/pdf_viewer.dart';
+import 'package:flutter_pomodoro/page_flappy_bird.dart';
+import 'package:flutter_pomodoro/page_snake.dart';
+import 'package:flutter_pomodoro/page_trex.dart';
 import 'package:flutter_pomodoro/profile_page.dart';
 import 'package:flutter_pomodoro/providers/counter.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
@@ -80,7 +83,10 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => LoginPage(),
         '/friends': (context) => FriendsPage(),
         '/splash': (context) => SplashPage(),
-        '/pdfViewer': (context) => PinchPage()
+        '/pdfViewer': (context) => PinchPage(),
+        '/flappy': (context) => FlappyBirdPage(),
+        '/snake': (context) => SnakeGamePage(),
+        '/trex': (context) => TrexGamePage(),
       },
     );
   }

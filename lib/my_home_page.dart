@@ -44,22 +44,43 @@ class MyHomePage extends StatelessWidget {
             ),
 
             MyButton(
-              label: 'Sample answer here.',
+              label: '++',
               onPressed: () {
                 increase(context);
               },
               isActive: true,
             ),
             MyButton(
-              label: 'Sample answer here.',
+              label: 'alert',
               onPressed: () => showMyDialog(context),
               isActive: false,
             ),
             MyButton(
-              label: 'Sample answer here.',
+              label: 'Logout',
               onPressed: () {
                 FirebaseAuth.instance.signOut();
                 Navigator.pushNamed(context, '/login');
+              },
+              isActive: false,
+            ),
+            MyButton(
+              label: 'Flappy Bird',
+              onPressed: () {
+                Navigator.pushNamed(context, '/flappy');
+              },
+              isActive: false,
+            ),
+            MyButton(
+              label: 'Snake',
+              onPressed: () {
+                Navigator.pushNamed(context, '/snake');
+              },
+              isActive: false,
+            ),
+            MyButton(
+              label: 'Trex',
+              onPressed: () {
+                Navigator.pushNamed(context, '/trex');
               },
               isActive: false,
             ),
