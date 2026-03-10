@@ -6,12 +6,15 @@ import 'package:flutter_pomodoro/firebase_options.dart';
 import 'package:flutter_pomodoro/friends_page.dart';
 import 'package:flutter_pomodoro/login_page.dart';
 import 'package:flutter_pomodoro/my_home_page.dart';
+import 'package:flutter_pomodoro/pdf_viewer.dart';
 import 'package:flutter_pomodoro/profile_page.dart';
 import 'package:flutter_pomodoro/providers/counter.dart';
+import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/providers/user.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/splash_page.dart';
 import 'package:provider/provider.dart';
+// import 'package:file_picker/file_picker.dart';
 
 bool shouldUseFirebaseEmulator = false;
 late final FirebaseApp app;
@@ -33,6 +36,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => MyCounter()),
         ChangeNotifierProvider(create: (_) => MyUser()),
+        ChangeNotifierProvider(create: (_) => MyFile()),
       ],
       child: const MyApp(),
     ),
@@ -76,6 +80,7 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => LoginPage(),
         '/friends': (context) => FriendsPage(),
         '/splash': (context) => SplashPage(),
+        '/pdfViewer': (context) => PinchPage()
       },
     );
   }
