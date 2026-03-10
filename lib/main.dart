@@ -6,6 +6,7 @@ import 'package:flutter_pomodoro/firebase_options.dart';
 import 'package:flutter_pomodoro/friends_page.dart';
 import 'package:flutter_pomodoro/login_page.dart';
 import 'package:flutter_pomodoro/my_home_page.dart';
+import 'package:flutter_pomodoro/page_flappy_bird.dart';
 import 'package:flutter_pomodoro/profile_page.dart';
 import 'package:flutter_pomodoro/providers/counter.dart';
 import 'package:flutter_pomodoro/providers/user.dart';
@@ -76,6 +77,7 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => LoginPage(),
         '/friends': (context) => FriendsPage(),
         '/splash': (context) => SplashPage(),
+        '/flappy': (context) => FlappyBirdPage(),
       },
     );
   }

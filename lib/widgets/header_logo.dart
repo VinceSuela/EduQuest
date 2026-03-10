@@ -10,7 +10,7 @@ class HeaderLogo extends StatelessWidget {
         padding: EdgeInsets.only(left: 60, right: 30),
         child: Transform.translate(
           offset: Offset(0, 10),
-          child: Image.asset('asset/images/logo-dark.png'),
+          child: Image.asset('assets/images/logo-dark.png'),
         ),
       ),
     );

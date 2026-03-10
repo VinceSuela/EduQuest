@@ -17,7 +17,7 @@ class BottomNavigation extends StatelessWidget {
       clipBehavior: .none,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('asset/images/bottom-bar.png'),
+          image: AssetImage('assets/images/bottom-bar.png'),
           fit: .cover,
           alignment: .topCenter,
         ),
@@ -41,7 +41,7 @@ class BottomNavigation extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Image.asset(
-                  'asset/images/generate-button.png',
+                  'assets/images/generate-button.png',
                   fit: .contain,
                 ),
               ),
@@ -53,7 +53,7 @@ class BottomNavigation extends StatelessWidget {
               onTap: () {},
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset('asset/images/start-button.png'),
+                child: Image.asset('assets/images/start-button.png'),
               ),
             ),
           ),
@@ -63,7 +63,7 @@ class BottomNavigation extends StatelessWidget {
               onTap: () {},
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset('asset/images/review-button.png'),
+                child: Image.asset('assets/images/review-button.png'),
               ),
             ),
           ),
