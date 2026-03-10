@@ -70,6 +70,13 @@ class MyHomePage extends StatelessWidget {
               },
               isActive: false,
             ),
+            MyButton(
+              label: 'Snake',
+              onPressed: () {
+                Navigator.pushNamed(context, '/snake');
+              },
+              isActive: false,
+            ),
           ],
         ),
       ),

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_pomodoro/games/flappy/background.dart';
 import 'package:flutter_pomodoro/games/flappy/bird.dart';
 import 'package:flutter_pomodoro/games/flappy/constant.dart';
@@ -11,7 +12,7 @@ import 'package:flutter_pomodoro/games/flappy/message.dart';
 import 'package:flutter_pomodoro/games/flappy/pipes.dart';
 import 'package:flutter_pomodoro/games/flappy/score.dart';
 import 'package:flutter_pomodoro/games/flappy/sounds.dart';
-import 'package:flutter/src/services/hardware_keyboard.dart';
+// import 'package:flutter/src/services/hardware_keyboard.dart';
 
 class FlappyBirdWorld extends World
     with
