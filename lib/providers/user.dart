@@ -50,4 +50,8 @@ class MyUser with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> resetPassword(String email) async {
+    FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  }
 }
