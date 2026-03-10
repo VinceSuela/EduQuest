@@ -77,6 +77,13 @@ class MyHomePage extends StatelessWidget {
               },
               isActive: false,
             ),
+            MyButton(
+              label: 'Trex',
+              onPressed: () {
+                Navigator.pushNamed(context, '/trex');
+              },
+              isActive: false,
+            ),
           ],
         ),
       ),
