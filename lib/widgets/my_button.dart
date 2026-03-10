@@ -6,10 +6,12 @@ class MyButton extends StatelessWidget {
     required this.label,
     required this.isActive,
     required this.onPressed,
+    this.isLoading = false,
   });
 
   final String label;
   final bool isActive;
+  final bool isLoading;
   final void Function() onPressed;
 
   @override
@@ -29,7 +31,9 @@ class MyButton extends StatelessWidget {
             borderRadius: BorderRadiusGeometry.all(Radius.circular(10)),
           ),
         ),
-        onPressed: () => {onPressed()},
+        onPressed: () => {
+          if (!isLoading) {onPressed()},
+        },
         child: FittedBox(
           fit: .scaleDown,
           child: Text(

@@ -5,8 +5,17 @@ class SignInForm extends StatefulWidget {
   final void Function(String email, String password)? onSignIn;
   final Widget? child;
   final String? submitLabel;
+  final bool isLoading;
+  final bool hidePassword;
 
-  const SignInForm({super.key, this.onSignIn, this.child, this.submitLabel});
+  const SignInForm({
+    super.key,
+    this.onSignIn,
+    this.child,
+    this.submitLabel,
+    this.isLoading = false,
+    this.hidePassword = false,
+  });
 
   @override
   State<SignInForm> createState() => _SignInFormState();
@@ -46,13 +55,8 @@ class _SignInFormState extends State<SignInForm> {
             style: TextStyle(fontSize: 15),
             decoration: const InputDecoration(
               labelText: 'Email',
-              // hintText: 'Email',
               prefixIcon: Icon(Icons.email),
             ),
-            // decoration: InputDecoration(
-            //   hintText: 'Email',
-            //   prefixIcon: Icon(Icons.email),
-            // ),
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -68,34 +72,40 @@ class _SignInFormState extends State<SignInForm> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            style: TextStyle(fontSize: 15),
-            decoration: InputDecoration(
-              labelText: 'Password',
-              prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+          Visibility(
+            visible: !widget.hidePassword,
+            child: const SizedBox(height: 16),
+          ),
+          Visibility(
+            visible: !widget.hidePassword,
+            child: TextFormField(
+              controller: _passwordController,
+              style: TextStyle(fontSize: 15),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
                 ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
               ),
+              obscureText: _obscurePassword,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
             ),
-            obscureText: _obscurePassword,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              }
-              if (value.length < 6) {
-                return 'Password must be at least 6 characters';
-              }
-              return null;
-            },
           ),
           const SizedBox(height: 24),
           MyButton(
