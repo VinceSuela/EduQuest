@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
@@ -20,24 +21,21 @@ enum DocShown { sample, tutorial, hello, password }
 class _PinchPageState extends State<PinchPage> {
   static const int _initialPage = 1;
   late PdfControllerPinch _pdfControllerPinch;
-  late PdfDocument pdfDoc;
+  late Uint8List bytes;
 
   @override
   void initState() {
+    bytes = Provider.of<MyFile>(
+      NavigationService.navigatorKey.currentContext!,
+    ).bytes;
     if (kIsWeb) {
       _pdfControllerPinch = PdfControllerPinch(
-        // document: PdfDocument.openAsset('assets/hello.pdf'),
-        document: PdfDocument.openData(
-          Provider.of<MyFile>(
-                NavigationService.navigatorKey.currentContext!,
-              ).bytes
-              as FutureOr<Uint8List>,
-        ),
+        document: PdfDocument.openData(bytes),
         initialPage: _initialPage,
       );
+      print(bytes);
     } else {
       _pdfControllerPinch = PdfControllerPinch(
-        // document: PdfDocument.openAsset('assets/hello.pdf'),
         document: PdfDocument.openFile(
           Provider.of<MyFile>(
             NavigationService.navigatorKey.currentContext!,

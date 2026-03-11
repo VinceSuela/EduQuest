@@ -53,7 +53,7 @@ class BottomNavigation extends StatelessWidget {
           style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
           onPressed: () {
             if (Navigator.canPop(context)) {
-              Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, '/home');
             }
           },
           child: Text('Back', style: TextStyle(color: Colors.white)),
@@ -90,7 +90,10 @@ class GenerateQuiz extends StatelessWidget {
       flex: 3,
       child: GestureDetector(
         onTap: () {
-          Navigator.pushNamed(context, '/pdfViewer');
+          Navigator.pushNamed(
+            NavigationService.navigatorKey.currentContext!,
+            '/pdfViewer',
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
