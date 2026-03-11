@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/providers/page.dart';
+import 'package:provider/provider.dart';
 
 class HeaderLogo extends StatelessWidget {
   const HeaderLogo({super.key});
@@ -7,10 +9,14 @@ class HeaderLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.only(left: 60, right: 30),
-        child: Transform.translate(
-          offset: Offset(0, 10),
-          child: Image.asset('assets/images/logo-dark.png'),
+        padding: EdgeInsets.only(left: 60, right: 30, bottom: 10),
+        child: Stack(
+          children: [
+            Transform.translate(
+              offset: Offset(0, 5),
+              child: Image.asset('assets/images/logo-dark.png', height: 80),
+            ),
+          ],
         ),
       ),
     );

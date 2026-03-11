@@ -25,7 +25,7 @@ class _SplashPageState extends State<SplashPage> {
       ).setUser();
     }
     Future.delayed(Duration(seconds: 3), () {
-      String routeName = isLoggedIn ? '/' : '/login';
+      String routeName = isLoggedIn ? '/home' : '/login';
       Navigator.of(
         NavigationService.navigatorKey.currentContext!,
       ).pushReplacementNamed(routeName);

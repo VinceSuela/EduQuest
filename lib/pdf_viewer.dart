@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,7 @@ class _PinchPageState extends State<PinchPage> {
     return Scaffold(
       backgroundColor: Colors.grey,
       appBar: AppBar(
-        title: Text(Provider.of<MyFile>(context).path.split('/').last),
+        title: Text(Provider.of<MyFile>(context).name),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.navigate_before),

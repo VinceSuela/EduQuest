@@ -104,16 +104,8 @@ class GenerateQuiz extends StatelessWidget {
   }
 }
 
-class StartLearning extends StatefulWidget {
+class StartLearning extends StatelessWidget {
   const StartLearning({super.key});
-
-  @override
-  State<StartLearning> createState() => _StartLearningState();
-}
-
-class _StartLearningState extends State<StartLearning> {
-  late PdfControllerPinch pdfPinchController;
-  bool showpdf = false;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +123,7 @@ class _StartLearningState extends State<StartLearning> {
             Provider.of<MyFile>(
               NavigationService.navigatorKey.currentContext!,
               listen: false,
-            ).setFile(file);
+            ).setFile(file, result.files.single.name);
             Navigator.pushNamed(
               NavigationService.navigatorKey.currentContext!,
               '/pdfViewer',

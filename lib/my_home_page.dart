@@ -5,6 +5,7 @@ import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_card.dart';
 import 'package:flutter_pomodoro/widgets/my_dialog.dart';
+import 'package:flutter_pomodoro/widgets/new_layout.dart';
 import 'package:provider/provider.dart';
 
 class MyHomePage extends StatelessWidget {
@@ -25,67 +26,79 @@ class MyHomePage extends StatelessWidget {
     return MyLayout(
       title: title,
       hideBottomNav: false,
-      child: MyCard(
-        child: ListView(
-          children: [
-            Center(
-              child: Text(
-                getCount(context),
-                key: const Key('counterState'),
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-            MyButton(
-              label: 'Sample answer here.',
-              onPressed: () {
-                Navigator.pushNamed(context, '/profile');
-              },
-              isActive: false,
-            ),
-
-            MyButton(
-              label: '++',
-              onPressed: () {
-                increase(context);
-              },
-              isActive: true,
-            ),
-            MyButton(
-              label: 'alert',
-              onPressed: () => showMyDialog(context),
-              isActive: false,
-            ),
-            MyButton(
-              label: 'Logout',
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-                Navigator.pushNamed(context, '/login');
-              },
-              isActive: false,
-            ),
-            MyButton(
-              label: 'Flappy Bird',
-              onPressed: () {
-                Navigator.pushNamed(context, '/flappy');
-              },
-              isActive: false,
-            ),
-            MyButton(
-              label: 'Snake',
-              onPressed: () {
-                Navigator.pushNamed(context, '/snake');
-              },
-              isActive: false,
-            ),
-            MyButton(
-              label: 'Trex',
-              onPressed: () {
-                Navigator.pushNamed(context, '/trex');
-              },
-              isActive: false,
-            ),
-          ],
+      child: Center(
+        child: CustomPaint(
+          painter: TrianglePainter(color: Colors.blue),
+          child: SizedBox(
+            height: 663 * 0.7, // Define the size of the canvas for the triangle
+            width: 265 * 0.7,
+          ),
         ),
+      ),
+    );
+  }
+
+  MyCard newMethod(BuildContext context) {
+    return MyCard(
+      child: ListView(
+        children: [
+          Center(
+            child: Text(
+              getCount(context),
+              key: const Key('counterState'),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ),
+          MyButton(
+            label: 'Sample answer here.',
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+            isActive: false,
+          ),
+
+          MyButton(
+            label: '++',
+            onPressed: () {
+              increase(context);
+            },
+            isActive: true,
+          ),
+          MyButton(
+            label: 'alert',
+            onPressed: () => showMyDialog(context),
+            isActive: false,
+          ),
+          MyButton(
+            label: 'Logout',
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pushNamed(context, '/login');
+            },
+            isActive: false,
+          ),
+          MyButton(
+            label: 'Flappy Bird',
+            onPressed: () {
+              Navigator.pushNamed(context, '/flappy');
+            },
+            isActive: false,
+          ),
+          MyButton(
+            label: 'Snake',
+            onPressed: () {
+              Navigator.pushNamed(context, '/snake');
+            },
+            isActive: false,
+          ),
+          MyButton(
+            label: 'Trex',
+            onPressed: () {
+              Navigator.pushNamed(context, '/trex');
+            },
+            isActive: false,
+          ),
+        ],
       ),
     );
   }

@@ -13,6 +13,7 @@ import 'package:flutter_pomodoro/page_trex.dart';
 import 'package:flutter_pomodoro/profile_page.dart';
 import 'package:flutter_pomodoro/providers/counter.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
+import 'package:flutter_pomodoro/providers/page.dart';
 import 'package:flutter_pomodoro/providers/user.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/splash_page.dart';
@@ -37,6 +38,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => MyPage()),
         ChangeNotifierProvider(create: (_) => MyCounter()),
         ChangeNotifierProvider(create: (_) => MyUser()),
         ChangeNotifierProvider(create: (_) => MyFile()),
@@ -76,13 +78,13 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash',
+      initialRoute: '/',
       routes: {
-        '/': (context) => const MyHomePage(),
+        '/': (context) => SplashPage(),
+        '/home': (context) => const MyHomePage(),
         '/profile': (context) => ProfilePage(),
         '/login': (context) => LoginPage(),
         '/friends': (context) => FriendsPage(),
-        '/splash': (context) => SplashPage(),
         '/pdfViewer': (context) => PinchPage(),
         '/flappy': (context) => FlappyBirdPage(),
         '/snake': (context) => SnakeGamePage(),

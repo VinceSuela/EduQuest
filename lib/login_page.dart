@@ -6,6 +6,7 @@ import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_card.dart';
+import 'package:flutter_pomodoro/widgets/new_layout.dart';
 import 'package:flutter_pomodoro/widgets/sign_in_form.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
     if (FirebaseAuth.instance.currentUser?.email != null) {
       Navigator.of(
         NavigationService.navigatorKey.currentContext!,
-      ).pushNamed('/');
+      ).pushNamed('/home');
     }
     super.initState();
   }
@@ -52,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
       if (credentials.user?.email != null) {
         Navigator.of(
           NavigationService.navigatorKey.currentContext!,
-        ).pushNamed('/');
+        ).pushNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
       showMyDialog(e.message ?? 'An error occurred');
@@ -83,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
       if (credentials.user?.email != null) {
         Navigator.of(
           NavigationService.navigatorKey.currentContext!,
-        ).pushNamed('/');
+        ).pushNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
       showMyDialog(e.message ?? 'An error occurred');
