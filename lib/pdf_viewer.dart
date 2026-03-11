@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
+import 'package:flutter_pomodoro/widgets/my_button.dart';
+import 'package:flutter_pomodoro/widgets/my_dialog.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:provider/provider.dart';
 
@@ -19,21 +21,27 @@ class PinchPage extends StatefulWidget {
 enum DocShown { sample, tutorial, hello, password }
 
 class _PinchPageState extends State<PinchPage> {
-  static const int _initialPage = 1;
+  int initialPage = 1;
   late PdfControllerPinch _pdfControllerPinch;
   late Uint8List bytes;
+  late Timer timer;
 
   @override
   void initState() {
     bytes = Provider.of<MyFile>(
       NavigationService.navigatorKey.currentContext!,
     ).bytes;
+    timer = Timer(Duration(seconds: 10), () {
+      showBreakTime(NavigationService.navigatorKey.currentContext!);
+    });
+    initialPage = Provider.of<MyFile>(
+      NavigationService.navigatorKey.currentContext!,
+    ).page;
     if (kIsWeb) {
       _pdfControllerPinch = PdfControllerPinch(
         document: PdfDocument.openData(bytes),
-        initialPage: _initialPage,
+        initialPage: initialPage,
       );
-      print(bytes);
     } else {
       _pdfControllerPinch = PdfControllerPinch(
         document: PdfDocument.openFile(
@@ -41,15 +49,21 @@ class _PinchPageState extends State<PinchPage> {
             NavigationService.navigatorKey.currentContext!,
           ).path,
         ),
-        initialPage: _initialPage,
+        initialPage: initialPage,
       );
     }
-
+    _pdfControllerPinch.addListener(() {
+      Provider.of<MyFile>(
+        NavigationService.navigatorKey.currentContext!,
+        listen: false,
+      ).setPage(_pdfControllerPinch.page);
+    });
     super.initState();
   }
 
   @override
   void dispose() {
+    timer.cancel();
     _pdfControllerPinch.dispose();
     super.dispose();
   }
@@ -68,7 +82,6 @@ class _PinchPageState extends State<PinchPage> {
                 curve: Curves.ease,
                 duration: const Duration(milliseconds: 100),
               );
-              Navigator.pushNamed(context, '/');
             },
           ),
           PdfPageNumber(
@@ -102,6 +115,43 @@ class _PinchPageState extends State<PinchPage> {
           errorBuilder: (_, error) => Center(child: Text(error.toString())),
         ),
         controller: _pdfControllerPinch,
+      ),
+    );
+  }
+
+  Future<String?> showBreakTime(BuildContext context) {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => MyDialog(
+        title: 'Have a break?',
+        child: Column(
+          children: [
+            MyButton(
+              label: 'Flappy Bird',
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushReplacementNamed(context, '/flappy');
+              },
+              isActive: false,
+            ),
+            MyButton(
+              label: 'Snake',
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushReplacementNamed(context, '/snake');
+              },
+              isActive: false,
+            ),
+            MyButton(
+              label: 'Trex',
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushReplacementNamed(context, '/trex');
+              },
+              isActive: false,
+            ),
+          ],
+        ),
       ),
     );
   }

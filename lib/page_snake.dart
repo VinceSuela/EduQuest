@@ -14,7 +14,9 @@ class SnakeGamePage extends StatelessWidget {
         child: GameWidget(game: game),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {Navigator.pop(context)},
+        onPressed: () => {
+          Navigator.pushReplacementNamed(context, '/pdfViewer'),
+        },
         tooltip: 'Close Game',
         child: const Icon(Icons.close),
       ),
