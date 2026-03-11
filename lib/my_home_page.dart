@@ -5,7 +5,7 @@ import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_card.dart';
 import 'package:flutter_pomodoro/widgets/my_dialog.dart';
-import 'package:flutter_pomodoro/widgets/new_layout.dart';
+import 'package:flutter_pomodoro/widgets/paint.dart';
 import 'package:provider/provider.dart';
 
 class MyHomePage extends StatelessWidget {

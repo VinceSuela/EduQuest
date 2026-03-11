@@ -6,7 +6,6 @@ import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_card.dart';
-import 'package:flutter_pomodoro/widgets/new_layout.dart';
 import 'package:flutter_pomodoro/widgets/sign_in_form.dart';
 import 'package:provider/provider.dart';
 

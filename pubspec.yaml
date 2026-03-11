@@ -43,6 +43,8 @@ dependencies:
   docx_file_viewer: ^1.0.1
   flame: ^1.36.0
   flame_audio: ^2.12.0
+  collection: ^1.19.1
+  unique_names_generator: ^3.0.0
 
 dev_dependencies:
   flutter_test:

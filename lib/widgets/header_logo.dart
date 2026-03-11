@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/providers/page.dart';
-import 'package:provider/provider.dart';
 
 class HeaderLogo extends StatelessWidget {
   const HeaderLogo({super.key});

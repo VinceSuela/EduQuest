@@ -1,19 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/providers/user.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/bottom_navigation.dart';
 import 'package:flutter_pomodoro/widgets/header_logo.dart';
-import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_drawer.dart';
 import 'package:flutter_pomodoro/widgets/side_nav.dart';
 import 'package:flutter_pomodoro/widgets/title.dart';
-import 'package:provider/provider.dart';
 
 class MyLayout extends StatefulWidget {
   final String title;
   final Widget child;
-  final bool? hideBottomNav;
+  final bool hideBottomNav;
   final bool hideSideNav;
   final bool hideBackButton;
   final bool noAuth;
@@ -94,7 +91,7 @@ class _MyLayoutState extends State<MyLayout> {
                         ),
                       ),
                       BottomNavigation(
-                        hideBottomNav: widget.hideBottomNav ?? false,
+                        hideBottomNav: widget.hideBottomNav,
                         hideBackButton: widget.hideBackButton,
                       ),
                     ],

@@ -23,7 +23,17 @@ class MyDialog extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     title,
-                    style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 25),
+                    style: TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 25,
+                      shadows: [
+                        Shadow(
+                          color: const Color.fromARGB(167, 0, 0, 0),
+                          offset: Offset(0, 4),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

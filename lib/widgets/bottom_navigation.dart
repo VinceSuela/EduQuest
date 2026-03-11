@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
-import 'package:pdfx/pdfx.dart';
+import 'package:flutter_pomodoro/widgets/my_quiz_dialog.dart';
+import 'package:flutter_pomodoro/widgets/paint.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavigation extends StatelessWidget {
@@ -12,24 +12,27 @@ class BottomNavigation extends StatelessWidget {
 
   const BottomNavigation({
     super.key,
-    required this.hideBottomNav,
+    this.hideBottomNav = false,
     this.hideBackButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: !hideBottomNav ? 100 : 60,
-      clipBehavior: .none,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/bottom-bar.png'),
-          fit: .cover,
-          alignment: .topCenter,
-        ),
+    return CustomPaint(
+      painter: NavPainter(),
+      child: Container(
+        height: !hideBottomNav ? 100 : 60,
+        clipBehavior: .none,
+        // decoration: BoxDecoration(
+        //   image: DecorationImage(
+        //     image: AssetImage('assets/images/bottom-bar.png'),
+        //     fit: .cover,
+        //     alignment: .topCenter,
+        //   ),
+        // ),
+        child: !hideBottomNav ? renderButtons() : renderBackButton(context),
+        //SizedBox(width: .infinity),
       ),
-      child: !hideBottomNav ? renderButtons() : renderBackButton(context),
-      //SizedBox(width: .infinity),
     );
   }
 
@@ -71,10 +74,26 @@ class ReviewQuizes extends StatelessWidget {
     return Flexible(
       flex: 3,
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          showQuiz(context);
+        },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Image.asset('assets/images/review-button.png'),
+        ),
+      ),
+    );
+  }
+
+  Future<String?> showQuiz(BuildContext context) {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => MyQuizDialog(
+        child: Center(
+          child: Text(
+            'Content here',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
         ),
       ),
     );
@@ -90,10 +109,15 @@ class GenerateQuiz extends StatelessWidget {
       flex: 3,
       child: GestureDetector(
         onTap: () {
-          Navigator.pushNamed(
+          if (Provider.of<MyFile>(
             NavigationService.navigatorKey.currentContext!,
-            '/pdfViewer',
-          );
+            listen: false,
+          ).name.isNotEmpty) {
+            Navigator.pushNamed(
+              NavigationService.navigatorKey.currentContext!,
+              '/pdfViewer',
+            );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),

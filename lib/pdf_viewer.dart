@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
@@ -12,7 +10,7 @@ import 'package:pdfx/pdfx.dart';
 import 'package:provider/provider.dart';
 
 class PinchPage extends StatefulWidget {
-  const PinchPage({Key? key}) : super(key: key);
+  const PinchPage({super.key});
 
   @override
   State<PinchPage> createState() => _PinchPageState();
@@ -25,18 +23,20 @@ class _PinchPageState extends State<PinchPage> {
   late PdfControllerPinch _pdfControllerPinch;
   late Uint8List bytes;
   late Timer timer;
+  late Timer timerDisplay;
+  Duration duration = Duration(seconds: 30);
+  DateTime startTime = DateTime.now();
+  DateTime endTime = DateTime.now().add(Duration(seconds: 30));
+  String remainingTime = '';
 
   @override
   void initState() {
-    bytes = Provider.of<MyFile>(
-      NavigationService.navigatorKey.currentContext!,
-    ).bytes;
-    timer = Timer(Duration(seconds: 10), () {
-      showBreakTime(NavigationService.navigatorKey.currentContext!);
-    });
-    initialPage = Provider.of<MyFile>(
-      NavigationService.navigatorKey.currentContext!,
-    ).page;
+    BuildContext navContext = NavigationService.navigatorKey.currentContext!;
+
+    bytes = Provider.of<MyFile>(navContext).bytes;
+
+    startTimer();
+    initialPage = Provider.of<MyFile>(navContext).page;
     if (kIsWeb) {
       _pdfControllerPinch = PdfControllerPinch(
         document: PdfDocument.openData(bytes),
@@ -44,21 +44,35 @@ class _PinchPageState extends State<PinchPage> {
       );
     } else {
       _pdfControllerPinch = PdfControllerPinch(
-        document: PdfDocument.openFile(
-          Provider.of<MyFile>(
-            NavigationService.navigatorKey.currentContext!,
-          ).path,
-        ),
+        document: PdfDocument.openFile(Provider.of<MyFile>(navContext).path),
         initialPage: initialPage,
       );
     }
     _pdfControllerPinch.addListener(() {
       Provider.of<MyFile>(
-        NavigationService.navigatorKey.currentContext!,
+        navContext,
         listen: false,
       ).setPage(_pdfControllerPinch.page);
     });
     super.initState();
+  }
+
+  void startTimer() {
+    BuildContext navContext = NavigationService.navigatorKey.currentContext!;
+    startTime = DateTime.now();
+    endTime = DateTime.now().add(duration);
+    timer = Timer(duration, () {
+      showBreakTime(navContext);
+    });
+    timerDisplay = Timer.periodic(Duration(seconds: 1), (currentTime) {
+      setState(() {
+        int remaining = endTime.difference(DateTime.now()).inSeconds;
+        if (remaining < 1) {
+          timerDisplay.cancel();
+        }
+        remainingTime = remaining.toString();
+      });
+    });
   }
 
   @override
@@ -70,10 +84,21 @@ class _PinchPageState extends State<PinchPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (Provider.of<MyFile>(context).name.isEmpty) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
     return Scaffold(
       backgroundColor: Colors.grey,
       appBar: AppBar(
-        title: Text(Provider.of<MyFile>(context).name),
+        title: Column(
+          children: [
+            FittedBox(
+              fit: .scaleDown,
+              child: Text(Provider.of<MyFile>(context).name),
+            ),
+            FittedBox(fit: .scaleDown, child: Text('$remainingTime remaining')),
+          ],
+        ),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.navigate_before),
@@ -149,6 +174,14 @@ class _PinchPageState extends State<PinchPage> {
                 Navigator.pushReplacementNamed(context, '/trex');
               },
               isActive: false,
+            ),
+            MyButton(
+              label: 'Not Now',
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                startTimer();
+              },
+              isActive: true,
             ),
           ],
         ),

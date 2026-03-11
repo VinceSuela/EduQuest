@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 class MyFile with ChangeNotifier {
   late PlatformFile _pdf;
   late String _name;
-  late Uint8List _bytes;
+  Uint8List _bytes = Uint8List(0);
   int _page = 1;
 
   String get path => File(_pdf.path!).path;
