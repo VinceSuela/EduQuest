@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+/linux/flutter/ephemeral
+/linux/flutter/generated*
+
+macos/Podfile.lock
