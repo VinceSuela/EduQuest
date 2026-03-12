@@ -33,6 +33,14 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
   }
 
+  void showLoading(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
   Future<void> signIn(
     BuildContext context,
     String email,
@@ -44,19 +52,23 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
+    showLoading(context);
     try {
       UserCredential credentials = await Provider.of<MyUser>(
         context,
         listen: false,
       ).logIn(email, password);
       if (credentials.user?.email != null) {
+        if (context.mounted) Navigator.pop(context);
         Navigator.of(
           NavigationService.navigatorKey.currentContext!,
         ).pushNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
+      if (context.mounted) Navigator.pop(context);
       showMyDialog(e.message ?? 'An error occurred');
     } catch (e) {
+      if (context.mounted) Navigator.pop(context);
       showMyDialog('An unexpected error occurred: $e');
     }
     setState(() {
@@ -75,19 +87,23 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
+    showLoading(context);
     try {
       UserCredential credentials = await Provider.of<MyUser>(
         context,
         listen: false,
       ).signUp(email, password);
       if (credentials.user?.email != null) {
+        if (context.mounted) Navigator.pop(context);
         Navigator.of(
           NavigationService.navigatorKey.currentContext!,
         ).pushNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
+      if (context.mounted) Navigator.pop(context);
       showMyDialog(e.message ?? 'An error occurred');
     } catch (e) {
+      if (context.mounted) Navigator.pop(context);
       showMyDialog('An unexpected error occurred: $e');
     }
     setState(() {
@@ -102,6 +118,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
+    showLoading(context);
     try {
       // FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       Provider.of<MyUser>(context, listen: false).resetPassword(email);
@@ -110,6 +127,7 @@ class _LoginPageState extends State<LoginPage> {
         formView = .login;
       });
     } on FirebaseAuthException catch (e) {
+      if (context.mounted) Navigator.pop(context);
       if (e.code == 'user-not-found') {
         showMyDialog('No user found for that email.');
       } else if (e.code == 'invalid-email') {
@@ -118,6 +136,7 @@ class _LoginPageState extends State<LoginPage> {
         showMyDialog(e.message ?? 'An error occurred');
       }
     } catch (e) {
+      if (context.mounted) Navigator.pop(context);
       showMyDialog('An unexpected error occurred: $e');
     }
     setState(() {
@@ -130,6 +149,89 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder: (BuildContext context) => Dialog(
         child: Padding(padding: .all(20), child: Text(text)),
+      ),
+    );
+  }
+
+  Widget renderLoginForm(BuildContext context) {
+    return SignInForm(
+      isLoading: isLoading,
+      onSignIn: (email, password) {
+        signIn(context, email, password);
+      },
+      child: Column(
+        children: [
+          TextButton(
+            onPressed: () => {
+              setState(() {
+                formView = .forgot;
+              }),
+            },
+            style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
+            child: Text('Forgot Password?'),
+          ),
+
+          Divider(indent: 50, endIndent: 50, height: 50),
+          Text('or'),
+          Divider(indent: 50, endIndent: 50, height: 50),
+          MyButton(
+            label: 'Sign Up',
+            onPressed: () {
+              setState(() {
+                formView = .signup;
+              });
+            },
+            isActive: false,
+            isLoading: isLoading,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget renderSignupForm(BuildContext context) {
+    return SignInForm(
+      submitLabel: 'Sign Up',
+      isLoading: isLoading,
+      onSignIn: (email, password) {
+        signUp(context, email, password);
+      },
+      child: Column(
+        children: [
+          TextButton(
+            onPressed: () => {
+              setState(() {
+                formView = .login;
+              }),
+            },
+            style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
+            child: Text('Already have an account'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget renderResetForm(BuildContext context) {
+    return SignInForm(
+      submitLabel: 'Reset Password',
+      isLoading: isLoading,
+      hidePassword: true,
+      onSignIn: (email, password) {
+        forgotPassword(context, email);
+      },
+      child: Column(
+        children: [
+          TextButton(
+            onPressed: () => {
+              setState(() {
+                formView = .login;
+              }),
+            },
+            style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
+            child: Text('Login instead'),
+          ),
+        ],
       ),
     );
   }
@@ -182,89 +284,6 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  SignInForm renderLoginForm(BuildContext context) {
-    return SignInForm(
-      isLoading: isLoading,
-      onSignIn: (email, password) {
-        signIn(context, email, password);
-      },
-      child: Column(
-        children: [
-          TextButton(
-            onPressed: () => {
-              setState(() {
-                formView = .forgot;
-              }),
-            },
-            style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
-            child: Text('Forgot Password?'),
-          ),
-
-          Divider(indent: 50, endIndent: 50, height: 50),
-          Text('or'),
-          Divider(indent: 50, endIndent: 50, height: 50),
-          MyButton(
-            label: 'Sign Up',
-            onPressed: () {
-              setState(() {
-                formView = .signup;
-              });
-            },
-            isActive: false,
-            isLoading: isLoading,
-          ),
-        ],
-      ),
-    );
-  }
-
-  SignInForm renderSignupForm(BuildContext context) {
-    return SignInForm(
-      submitLabel: 'Sign Up',
-      isLoading: isLoading,
-      onSignIn: (email, password) {
-        signUp(context, email, password);
-      },
-      child: Column(
-        children: [
-          TextButton(
-            onPressed: () => {
-              setState(() {
-                formView = .login;
-              }),
-            },
-            style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
-            child: Text('Already have an account'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  SignInForm renderResetForm(BuildContext context) {
-    return SignInForm(
-      submitLabel: 'Reset Password',
-      isLoading: isLoading,
-      hidePassword: true,
-      onSignIn: (email, password) {
-        forgotPassword(context, email);
-      },
-      child: Column(
-        children: [
-          TextButton(
-            onPressed: () => {
-              setState(() {
-                formView = .login;
-              }),
-            },
-            style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
-            child: Text('Login instead'),
           ),
         ],
       ),

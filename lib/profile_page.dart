@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/user.dart';
+import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_card.dart';
@@ -104,17 +106,16 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            // Card(child: Center(child: Icon(Icons.leaderboard))),
-            // Card(child: Center(child: Icon(Icons.star))),
-            // MyButton(
-            //   label: 'Leader Board',
-            //   onPressed: () {
-            //     if (Navigator.canPop(context)) {
-            //       Navigator.pop(context);
-            //     }
-            //   },
-            //   isActive: false,
-            // ),
+            MyButton(
+              label: 'Log out',
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(
+                  NavigationService.navigatorKey.currentContext!,
+                ).pushReplacementNamed('/login');
+              },
+              isActive: false,
+            ),
           ],
         ),
       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/constant.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
@@ -26,8 +27,7 @@ class _PinchPageState extends State<PinchPage> {
   late Timer timer;
   late Timer timerDisplay;
   final Duration duration = Duration(seconds: 5);
-  DateTime startTime = DateTime.now();
-  late DateTime endTime = DateTime.now().add(duration);
+  late DateTime endTime = DateTime.now().add(learnDuration);
   String remainingTime = '';
 
   @override
@@ -60,9 +60,8 @@ class _PinchPageState extends State<PinchPage> {
 
   void startTimer() {
     BuildContext navContext = NavigationService.navigatorKey.currentContext!;
-    startTime = DateTime.now();
-    endTime = DateTime.now().add(duration);
-    timer = Timer(duration, () {
+    endTime = DateTime.now().add(learnDuration);
+    timer = Timer(learnDuration, () {
       showBreakTime(navContext);
     });
     timerDisplay = Timer.periodic(Duration(seconds: 1), (currentTime) {
@@ -90,6 +89,7 @@ class _PinchPageState extends State<PinchPage> {
   @override
   void dispose() {
     timer.cancel();
+    timerDisplay.cancel();
     _pdfControllerPinch.dispose();
     super.dispose();
   }
@@ -165,36 +165,44 @@ class _PinchPageState extends State<PinchPage> {
   Future<String?> showBreakTime(BuildContext context) {
     return showDialog<String>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext dialogContext) => MyDialog(
         title: 'Have a break?',
         child: Column(
           children: [
-            MyButton(
-              label: 'Flappy Bird',
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                Navigator.pushReplacementNamed(context, '/flappy');
-              },
-              isActive: false,
+            Expanded(
+              child: Column(
+                children: [
+                  MyButton(
+                    label: 'Flappy Bird',
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      Navigator.pushReplacementNamed(context, '/flappy');
+                    },
+                    isActive: false,
+                  ),
+                  MyButton(
+                    label: 'Snake',
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      Navigator.pushReplacementNamed(context, '/snake');
+                    },
+                    isActive: false,
+                  ),
+                  MyButton(
+                    label: 'Trex',
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      Navigator.pushReplacementNamed(context, '/trex');
+                    },
+                    isActive: false,
+                  ),
+                ],
+              ),
             ),
+
             MyButton(
-              label: 'Snake',
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                Navigator.pushReplacementNamed(context, '/snake');
-              },
-              isActive: false,
-            ),
-            MyButton(
-              label: 'Trex',
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                Navigator.pushReplacementNamed(context, '/trex');
-              },
-              isActive: false,
-            ),
-            MyButton(
-              label: 'Not Now',
+              label: 'Continue Learning',
               onPressed: () {
                 Navigator.pop(dialogContext);
                 startTimer();
@@ -202,7 +210,7 @@ class _PinchPageState extends State<PinchPage> {
               isActive: true,
             ),
             MyButton(
-              label: 'Quiz Now',
+              label: 'Test your knowledge',
               isActive: true,
               onPressed: () async {
                 final myFile = Provider.of<MyFile>(context, listen: false);
