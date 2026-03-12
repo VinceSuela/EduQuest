@@ -28,7 +28,8 @@
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		3AF03881524B8A379B1432D7 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D69B5A71971A03FB2B2EB1C0 /* Pods_RunnerTests.framework */; };
-		A09AD24237F8E2FFE68D58BC /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B678D1DF16E50BEEA25EFC70 /* Pods_Runner.framework */; };
+		444425292F62758200C2276F /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B678D1DF16E50BEEA25EFC70 /* Pods_Runner.framework */; };
+		4444252A2F62758200C2276F /* Pods_Runner.framework in Bundle Framework */ = {isa = PBXBuildFile; fileRef = B678D1DF16E50BEEA25EFC70 /* Pods_Runner.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C3C874376359C2A8368B9200 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E2466017D80D47F89F9892F0 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -105,7 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A09AD24237F8E2FFE68D58BC /* Pods_Runner.framework in Frameworks */,
+				444425292F62758200C2276F /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -595,11 +596,13 @@
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EduQuest;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
 				SWIFT_VERSION = 5.0;
@@ -745,11 +748,12 @@
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EduQuest;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.example.eduquest-2026";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
@@ -781,11 +785,13 @@
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EduQuest;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
 				SWIFT_VERSION = 5.0;
