@@ -45,6 +45,8 @@ dependencies:
   flame_audio: ^2.12.0
   collection: ^1.19.1
   unique_names_generator: ^3.0.0
+  google_generative_ai: ^0.4.7
+  syncfusion_flutter_pdf: ^32.2.9
 
 dev_dependencies:
   flutter_test:

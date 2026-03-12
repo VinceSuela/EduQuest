@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
@@ -113,7 +115,7 @@ class GenerateQuiz extends StatelessWidget {
             NavigationService.navigatorKey.currentContext!,
             listen: false,
           ).name.isNotEmpty) {
-            Navigator.pushNamed(
+            Navigator.pushReplacementNamed(
               NavigationService.navigatorKey.currentContext!,
               '/pdfViewer',
             );
@@ -142,19 +144,20 @@ class StartLearning extends StatelessWidget {
         onTap: () async {
           FilePickerResult? result = await FilePicker.platform.pickFiles(
             type: FileType.custom,
-            allowedExtensions: ['pdf', 'docx'],
+            allowedExtensions: ['pdf'],
+            withData: true,
           );
 
           if (result != null) {
+            if (!context.mounted) return;
             PlatformFile file = result.files.single;
             Provider.of<MyFile>(
               NavigationService.navigatorKey.currentContext!,
               listen: false,
             ).setFile(file, result.files.single.name);
-            Navigator.pushNamed(
+            Navigator.of(
               NavigationService.navigatorKey.currentContext!,
-              '/pdfViewer',
-            );
+            ).pushReplacementNamed('/pdfViewer');
           } else {
             return;
           }

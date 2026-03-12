@@ -6,6 +6,7 @@ import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_dialog.dart';
+import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:provider/provider.dart';
 
@@ -24,9 +25,9 @@ class _PinchPageState extends State<PinchPage> {
   late Uint8List bytes;
   late Timer timer;
   late Timer timerDisplay;
-  Duration duration = Duration(seconds: 30);
+  Duration duration = Duration(minutes: 1);
   DateTime startTime = DateTime.now();
-  DateTime endTime = DateTime.now().add(Duration(seconds: 30));
+  DateTime endTime = DateTime.now().add(Duration(minutes: 1));
   String remainingTime = '';
 
   @override
@@ -70,9 +71,20 @@ class _PinchPageState extends State<PinchPage> {
         if (remaining < 1) {
           timerDisplay.cancel();
         }
-        remainingTime = remaining.toString();
+        remainingTime = formatDuration(remaining).toString();
       });
     });
+  }
+
+  String formatDuration(int totalSeconds) {
+    final duration = Duration(seconds: totalSeconds);
+    final minutes = duration.inMinutes;
+    final seconds = totalSeconds % 60;
+
+    final minutesString = '$minutes'.padLeft(2, '0');
+    final secondsString = '$seconds'.padLeft(2, '0');
+
+    return '$minutesString:$secondsString';
   }
 
   @override
@@ -96,8 +108,14 @@ class _PinchPageState extends State<PinchPage> {
               fit: .scaleDown,
               child: Text(Provider.of<MyFile>(context).name),
             ),
-            FittedBox(fit: .scaleDown, child: Text('$remainingTime remaining')),
+            FittedBox(fit: .scaleDown, child: Text('$remainingTime')),
           ],
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/home');
+          },
         ),
         actions: <Widget>[
           IconButton(
@@ -182,6 +200,40 @@ class _PinchPageState extends State<PinchPage> {
                 startTimer();
               },
               isActive: true,
+            ),
+            MyButton(
+              label: 'Quiz Now',
+              isActive: true,
+              onPressed: () async {
+                final myFile = Provider.of<MyFile>(context, listen: false);
+
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+
+                try {
+                  final quizService = GeminiQuizService();
+                  final List<QuizQuestion> questions = await quizService
+                      .generateQuizFromBytes(myFile.bytes);
+
+                  if (context.mounted) Navigator.pop(context);
+
+                  if (context.mounted) {
+                    Navigator.pushReplacementNamed(
+                      NavigationService.navigatorKey.currentContext!,
+                      '/quiz',
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to generate quiz: $e")),
+                  );
+                }
+              },
             ),
           ],
         ),

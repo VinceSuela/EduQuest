@@ -18,8 +18,13 @@ class MyFile with ChangeNotifier {
   void setFile(PlatformFile file, String name) {
     _pdf = file;
     _name = name;
-    _bytes = file.bytes!;
     _page = 1;
+
+    if (file.bytes != null) {
+      _bytes = file.bytes!;
+    } else if (file.path != null) {
+      _bytes = File(file.path!).readAsBytesSync();
+    }
     notifyListeners();
   }
 

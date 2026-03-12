@@ -17,6 +17,7 @@ import 'package:flutter_pomodoro/providers/page.dart';
 import 'package:flutter_pomodoro/providers/user.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/splash_page.dart';
+import 'package:flutter_pomodoro/quiz_page.dart';
 import 'package:provider/provider.dart';
 // import 'package:file_picker/file_picker.dart';
 
@@ -89,6 +90,7 @@ class _MyAppState extends State<MyApp> {
         '/flappy': (context) => FlappyBirdPage(),
         '/snake': (context) => SnakeGamePage(),
         '/trex': (context) => TrexGamePage(),
+        '/quiz': (context) => MyQuiz(),
       },
     );
   }

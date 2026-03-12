@@ -29,15 +29,15 @@ class ProfilePage extends StatelessWidget {
           children: [
             Center(
               child: Padding(
-                padding: const EdgeInsets.only(top: 30),
+                padding: const EdgeInsets.only(top: 5),
                 child: Card(
                   color: Color(0xFF47B9FF),
                   child: FittedBox(
                     fit: .scaleDown,
                     child: SizedBox(
-                      width: 125,
-                      height: 125,
-                      child: Center(child: Icon(Icons.person, size: 110)),
+                      width: 100,
+                      height: 100,
+                      child: Center(child: Icon(Icons.person, size: 90)),
                     ),
                   ),
                 ),
@@ -68,50 +68,53 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            Card(
-              color: Color(0xFFD2EEFF),
-              child: SizedBox(
-                height: 200,
-                child: Column(
-                  children: [
-                    Center(
-                      child: Text(
-                        'ACHIEVEMENTS',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                    Expanded(
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: screenWidth ~/ 150,
+            Expanded(
+              child: Card(
+                color: Color(0xFFD2EEFF),
+                child: SizedBox(
+                  height: 300,
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Text(
+                          'ACHIEVEMENTS',
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        itemCount: achievement.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            child: Center(
-                              child: FittedBox(
-                                child: Icon(achievement[index], size: 40),
-                              ),
-                            ),
-                          );
-                        },
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: screenWidth ~/ 80,
+                              ),
+                          itemCount: achievement.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              child: Center(
+                                child: FittedBox(
+                                  child: Icon(achievement[index], size: 40),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             // Card(child: Center(child: Icon(Icons.leaderboard))),
             // Card(child: Center(child: Icon(Icons.star))),
-            MyButton(
-              label: 'Leader Board',
-              onPressed: () {
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
-              },
-              isActive: false,
-            ),
+            // MyButton(
+            //   label: 'Leader Board',
+            //   onPressed: () {
+            //     if (Navigator.canPop(context)) {
+            //       Navigator.pop(context);
+            //     }
+            //   },
+            //   isActive: false,
+            // ),
           ],
         ),
       ),

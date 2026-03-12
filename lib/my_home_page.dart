@@ -29,10 +29,7 @@ class MyHomePage extends StatelessWidget {
       child: Center(
         child: CustomPaint(
           painter: TrianglePainter(color: Colors.blue),
-          child: SizedBox(
-            height: 663 * 0.7, // Define the size of the canvas for the triangle
-            width: 265 * 0.7,
-          ),
+          child: SizedBox(height: 663 * 0.7, width: 265 * 0.7),
         ),
       ),
     );

@@ -48,8 +48,8 @@ class FriendsPage extends StatelessWidget {
               child: ListView.builder(
                 itemCount: 20,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Card(
+                  return Container(
+                    child: Card(
                       child: Row(
                         children: [
                           Card(
@@ -57,16 +57,16 @@ class FriendsPage extends StatelessWidget {
                             child: FittedBox(
                               fit: .scaleDown,
                               child: SizedBox(
-                                width: 100,
-                                height: 100,
+                                width: 50,
+                                height: 50,
                                 child: Center(
-                                  child: Icon(Icons.person, size: 100),
+                                  child: Icon(Icons.person, size: 50),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Column(
                               crossAxisAlignment: .start,
                               children: [
