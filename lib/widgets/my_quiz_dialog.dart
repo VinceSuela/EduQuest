@@ -8,10 +8,10 @@ class MyQuizDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
+    return Container(
+      color: Colors.transparent,
       child: SizedBox(
-        height: 700,
+        height: 800,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(

@@ -14,11 +14,13 @@ class MyLayout extends StatefulWidget {
   final bool hideSideNav;
   final bool hideBackButton;
   final bool noAuth;
+  final bool hideHeader;
 
   const MyLayout({
     super.key,
     required this.title,
     required this.child,
+    this.hideHeader = false,
     this.hideBottomNav = true,
     this.hideSideNav = false,
     this.hideBackButton = false,
@@ -49,17 +51,19 @@ class _MyLayoutState extends State<MyLayout> {
         decoration: BoxDecoration(color: Color(0xFF47B9FF)),
         child: Column(
           children: [
-            HeaderLogo(),
+            Visibility(visible: !widget.hideHeader, child: HeaderLogo()),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(top: 0),
                 child: Container(
                   width: .infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.elliptical(500, 75),
-                      topRight: Radius.elliptical(500, 75),
-                    ),
+                    borderRadius: !widget.hideHeader
+                        ? BorderRadius.only(
+                            topLeft: Radius.elliptical(500, 75),
+                            topRight: Radius.elliptical(500, 75),
+                          )
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: const Color.fromARGB(64, 0, 0, 0),
@@ -76,7 +80,10 @@ class _MyLayoutState extends State<MyLayout> {
                   ),
                   child: Column(
                     children: [
-                      MyTitle(title: widget.title),
+                      Visibility(
+                        visible: !widget.hideHeader,
+                        child: MyTitle(title: widget.title),
+                      ),
                       // Expanded(child: widget.child),
                       Expanded(
                         child: Stack(

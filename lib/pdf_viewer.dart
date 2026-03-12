@@ -25,9 +25,9 @@ class _PinchPageState extends State<PinchPage> {
   late Uint8List bytes;
   late Timer timer;
   late Timer timerDisplay;
-  Duration duration = Duration(minutes: 1);
+  final Duration duration = Duration(seconds: 5);
   DateTime startTime = DateTime.now();
-  DateTime endTime = DateTime.now().add(Duration(minutes: 1));
+  late DateTime endTime = DateTime.now().add(duration);
   String remainingTime = '';
 
   @override
@@ -215,10 +215,14 @@ class _PinchPageState extends State<PinchPage> {
                 );
 
                 try {
-                  final quizService = GeminiQuizService();
-                  final List<QuizQuestion> questions = await quizService
-                      .generateQuizFromBytes(myFile.bytes);
-
+                  await Provider.of<GeminiQuizService>(
+                    NavigationService.navigatorKey.currentContext!,
+                    listen: false,
+                  ).generateQuizFromBytes(myFile.bytes, debug: true);
+                  // final quizService = GeminiQuizService();
+                  // final List<QuizQuestion> questions = await quizService
+                  //     .generateQuizFromBytes(myFile.bytes);
+                  // print(questions);
                   if (context.mounted) Navigator.pop(context);
 
                   if (context.mounted) {

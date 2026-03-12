@@ -14,6 +14,7 @@ import 'package:flutter_pomodoro/profile_page.dart';
 import 'package:flutter_pomodoro/providers/counter.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/providers/page.dart';
+import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:flutter_pomodoro/providers/user.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/splash_page.dart';
@@ -43,6 +44,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => MyCounter()),
         ChangeNotifierProvider(create: (_) => MyUser()),
         ChangeNotifierProvider(create: (_) => MyFile()),
+        ChangeNotifierProvider(create: (_) => GeminiQuizService()),
       ],
       child: const MyApp(),
     ),
