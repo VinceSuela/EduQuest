@@ -15,6 +15,7 @@ class MyLayout extends StatefulWidget {
   final bool hideBackButton;
   final bool noAuth;
   final bool hideHeader;
+  final String backUrl;
 
   const MyLayout({
     super.key,
@@ -25,6 +26,7 @@ class MyLayout extends StatefulWidget {
     this.hideSideNav = false,
     this.hideBackButton = false,
     this.noAuth = false,
+    this.backUrl = '/home',
   });
 
   @override
@@ -100,6 +102,7 @@ class _MyLayoutState extends State<MyLayout> {
                       BottomNavigation(
                         hideBottomNav: widget.hideBottomNav,
                         hideBackButton: widget.hideBackButton,
+                        backUrl: widget.backUrl,
                       ),
                     ],
                   ),

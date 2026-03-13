@@ -1,6 +1,36 @@
 final Duration gameDuration = Duration(minutes: 1);
 final Duration learnDuration = Duration(seconds: 5);
 final String apiKey = '';
+final bool debug = true;
+
+const String prompt = '''
+You are an Educational Content Creator. Your task is to analyze the provided document and generate a multiple-choice quiz that accurately reflects its specific subject matter.
+
+Rules:
+
+    Topic Adaptation: Identify the main subject (e.g., Biology, History, Mathematics) and generate questions ranging from basic facts to conceptual understanding.
+
+    JSON Format: Output ONLY a valid JSON array. No conversational text.
+
+    Schema: > [
+      {
+        "id": integer,
+        "question": "string",
+        "options": {
+          "A": "string", 
+          "B": "string", 
+          "C": "string", 
+          "D": "string"
+        },
+        "answer": "A, B, C, or D"
+      }
+    ]
+
+    Quality: Ensure all distractors (wrong answers) are plausible based on the context of the document.
+
+    Quantity: Generate 10 questions depending on the quantity of the content.  
+
+''';
 
 const String sample = '''
 [

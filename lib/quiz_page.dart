@@ -57,6 +57,7 @@ class _MyQuizState extends State<MyQuiz> {
   Widget build(BuildContext context) {
     return MyLayout(
       title: '',
+      backUrl: '/pdfViewer',
       hideHeader: true,
       hideSideNav: true,
       child: MyQuizDialog(

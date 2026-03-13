@@ -12,10 +12,7 @@ class GeminiQuizService with ChangeNotifier {
 
   List<QuizQuestion> get questions => _questions;
 
-  Future<List<QuizQuestion>> generateQuizFromBytes(
-    Uint8List pdfBytes, {
-    bool debug = true,
-  }) async {
+  Future<List<QuizQuestion>> generateQuizFromBytes(Uint8List pdfBytes) async {
     List<dynamic> decodedList;
     try {
       if (debug) {
@@ -32,34 +29,15 @@ class GeminiQuizService with ChangeNotifier {
           ),
         );
 
-        final prompt = [
+        final aiPrompt = [
           Content.text('''
-          You are an Educational Content Creator. Your task is to analyze the provided document and generate a multiple-choice quiz that accurately reflects its specific subject matter.
-
-          Rules:
-
-              Topic Adaptation: Identify the main subject (e.g., Biology, History, Mathematics) and generate questions ranging from basic facts to conceptual understanding.
-
-              JSON Format: Output ONLY a valid JSON array. No conversational text.
-
-              Schema: > [
-              {
-              "id": integer,
-              "question": "string",
-              "options": {"A": "string", "B": "string", "C": "string", "D": "string"},
-              "answer": "A, B, C, or D"
-              }
-              ]
-
-              Quality: Ensure all distractors (wrong answers) are plausible based on the context of the document.
-
-              Quantity: Generate 10 questions depending on the quantity of the content.      
+          $prompt   
           Learning Material:
           $extractedText
         '''),
         ];
 
-        final response = await model.generateContent(prompt);
+        final response = await model.generateContent(aiPrompt);
         if (response.text == null) {
           throw Exception("AI returned empty response");
         }

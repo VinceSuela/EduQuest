@@ -11,11 +11,13 @@ import 'package:provider/provider.dart';
 class BottomNavigation extends StatelessWidget {
   final bool hideBottomNav;
   final bool hideBackButton;
+  final String backUrl;
 
   const BottomNavigation({
     super.key,
     this.hideBottomNav = false,
     this.hideBackButton = false,
+    this.backUrl = '/home',
   });
 
   @override
@@ -58,7 +60,7 @@ class BottomNavigation extends StatelessWidget {
           style: ButtonStyle(overlayColor: WidgetStateColor.transparent),
           onPressed: () {
             if (Navigator.canPop(context)) {
-              Navigator.pushReplacementNamed(context, '/home');
+              Navigator.pushReplacementNamed(context, backUrl);
             }
           },
           child: Text('Back', style: TextStyle(color: Colors.white)),

@@ -226,11 +226,8 @@ class _PinchPageState extends State<PinchPage> {
                   await Provider.of<GeminiQuizService>(
                     NavigationService.navigatorKey.currentContext!,
                     listen: false,
-                  ).generateQuizFromBytes(myFile.bytes, debug: true);
-                  // final quizService = GeminiQuizService();
-                  // final List<QuizQuestion> questions = await quizService
-                  //     .generateQuizFromBytes(myFile.bytes);
-                  // print(questions);
+                  ).generateQuizFromBytes(myFile.bytes);
+
                   if (context.mounted) Navigator.pop(context);
 
                   if (context.mounted) {
@@ -241,7 +238,9 @@ class _PinchPageState extends State<PinchPage> {
                   }
                 } catch (e) {
                   if (context.mounted) Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(
+                    NavigationService.navigatorKey.currentContext!,
+                  ).showSnackBar(
                     SnackBar(content: Text("Failed to generate quiz: $e")),
                   );
                 }
