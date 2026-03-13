@@ -47,4 +47,4 @@ app.*.map.json
 /linux/flutter/ephemeral
 /linux/flutter/generated*
 
-macos/Podfile.lock
+macos/*
