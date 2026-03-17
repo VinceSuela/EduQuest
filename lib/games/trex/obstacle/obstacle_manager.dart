@@ -6,7 +6,8 @@ import 'package:flutter_pomodoro/games/trex/obstacle/obstacle.dart';
 import 'package:flutter_pomodoro/games/trex/obstacle/obstacle_type.dart';
 import 'package:flutter_pomodoro/games/trex/trex_game.dart';
 
-class ObstacleManager extends Component with HasGameReference<TRexGame> {
+class ObstacleManager extends Component
+    with HasGameReference<TRexGame>, HasWorldReference<TRexGameWorld> {
   ObstacleManager();
 
   ListQueue<ObstacleType> history = ListQueue();
@@ -47,7 +48,7 @@ class ObstacleManager extends Component with HasGameReference<TRexGame> {
     final groupSize = _groupSize(settings);
     for (var i = 0; i < groupSize; i++) {
       add(Obstacle(settings: settings, groupIndex: i));
-      game.score++;
+      world.score = game.score + 1;
     }
 
     history.addFirst(settings.type);

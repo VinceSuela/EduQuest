@@ -27,10 +27,14 @@ class MyUser with ChangeNotifier {
       );
 
       username = credentials.user!.email!;
-      print(credentials.user);
+      if (kDebugMode) {
+        print(credentials.user);
+      }
       return credentials;
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       rethrow;
     }
   }
@@ -43,10 +47,14 @@ class MyUser with ChangeNotifier {
       );
 
       username = credentials.user!.email!;
-      print(credentials.user);
+      if (kDebugMode) {
+        print(credentials.user);
+      }
       return credentials;
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       rethrow;
     }
   }

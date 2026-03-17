@@ -108,7 +108,7 @@ class _PinchPageState extends State<PinchPage> {
               fit: .scaleDown,
               child: Text(Provider.of<MyFile>(context).name),
             ),
-            FittedBox(fit: .scaleDown, child: Text('$remainingTime')),
+            FittedBox(fit: .scaleDown, child: Text(remainingTime)),
           ],
         ),
         leading: IconButton(

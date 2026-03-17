@@ -15,7 +15,7 @@ class FlappyBirdPage extends StatefulWidget {
 }
 
 class _FlappyBirdPageState extends State<FlappyBirdPage> {
-  final FlappyBirdGame game = FlappyBirdGame();
+  // final FlappyBirdGame game = FlappyBirdGame();
   late Timer timer;
 
   void startTimer() {
@@ -42,7 +42,10 @@ class _FlappyBirdPageState extends State<FlappyBirdPage> {
     return Scaffold(
       body: Container(
         color: Colors.lightBlue,
-        child: GameWidget(game: game),
+        child: GameWidget(
+          game: FlappyBirdGame(),
+          loadingBuilder: (_) => const Center(child: Text('Loading')),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => {

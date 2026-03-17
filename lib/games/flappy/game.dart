@@ -2,6 +2,7 @@ import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/games/flappy/world.dart';
 
 class FlappyBirdGame extends FlameGame with HasKeyboardHandlerComponents {
@@ -13,6 +14,9 @@ class FlappyBirdGame extends FlameGame with HasKeyboardHandlerComponents {
           // backdrop: Background(),
         ),
       );
+
+  @override
+  Color backgroundColor() => Color(0xFF47B9FF);
 
   @override
   Future<void> onLoad() async {

@@ -118,13 +118,25 @@ class SnakeWorld extends World
       knob: CircleComponent(
         radius: 20,
         // anchor: .center,
-        paint: Paint()..color = Color.fromARGB(255, 170, 71, 188),
+        paintLayers: [
+          Paint()..color = Color.fromARGB(255, 170, 71, 188),
+          Paint()
+            ..color = Color.fromARGB(255, 77, 18, 87)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1,
+        ],
       ),
       knobRadius: 40,
       background: CircleComponent(
         radius: 40,
         // anchor: .center,
-        paint: Paint()..color = Color.fromARGB(255, 206, 147, 216),
+        paintLayers: [
+          Paint()..color = Color.fromARGB(255, 206, 147, 216),
+          Paint()
+            ..color = Color.fromARGB(255, 86, 53, 91)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1,
+        ],
       ),
       // margin: const EdgeInsets.only(left: 128, bottom: 32),
       position: Vector2(gameScreen.x * 0.5, gameScreen.y - 55),

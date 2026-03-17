@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
@@ -10,46 +12,70 @@ import 'package:flame/text.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:flutter/services.dart';
 import 'package:flutter_pomodoro/games/trex/background/horizon.dart';
+import 'package:flutter_pomodoro/games/trex/constant.dart';
 import 'package:flutter_pomodoro/games/trex/game_over.dart';
 import 'package:flutter_pomodoro/games/trex/player.dart';
 
 enum GameState { playing, intro, gameOver }
 
-class TRexGame extends FlameGame
-    with KeyboardEvents, TapCallbacks, HasCollisionDetection {
-  static const String description = '''
-    A game similar to the game in chrome that you get to play while offline.
-    Press space or tap/click the screen to jump, the more obstacles you manage
-    to survive, the more points you get.
-  ''';
-
+class TRexGame extends FlameGame with KeyboardEvents {
   final Random random = Random();
   late final Image spriteImage;
+  GameState state = GameState.intro;
+  bool get isPlaying => state == GameState.playing;
+  bool get isGameOver => state == GameState.gameOver;
+  bool get isIntro => state == GameState.intro;
+
+  int _score = 0;
+  int _highScore = 0;
+  int get score => _score;
+  double currentSpeed = 0.0;
+  double timePlaying = 0.0;
+  double _distanceTraveled = 0;
+
+  TRexGame()
+    : super(
+        world: TRexGameWorld(),
+        camera: CameraComponent(
+          // viewport: FixedResolutionViewport(resolution: gameScreen),
+          viewfinder: Viewfinder(),
+        ),
+      );
 
   @override
   Color backgroundColor() => const Color(0xFFFFFFFF);
 
+  @override
+  Future<void> onLoad() async {
+    spriteImage = await Flame.images.load('trex.png');
+    camera.viewport.position.x = size.x * -0.5;
+    camera.viewport.position.y = size.y * -0.5;
+    // camera.viewport.anchor = .topLeft;
+    return super.onLoad();
+  }
+}
+
+class TRexGameWorld extends World
+    with
+        TapCallbacks,
+        HasCollisionDetection,
+        KeyboardHandler,
+        HasGameReference<TRexGame> {
   late final player = Player();
   late final horizon = Horizon();
   late final gameOverPanel = GameOverPanel();
   late final TextComponent scoreText;
 
-  int _score = 0;
-  int _highScore = 0;
-  int get score => _score;
   set score(int newScore) {
-    _score = newScore;
-    scoreText.text = '${scoreString(_score)}  HI ${scoreString(_highScore)}';
+    game._score = newScore;
+    scoreText.text =
+        '${scoreString(game._score)}  HI ${scoreString(game._highScore)}';
   }
 
   String scoreString(int score) => score.toString().padLeft(5, '0');
 
-  /// Used for score calculation
-  double _distanceTraveled = 0;
-
   @override
   Future<void> onLoad() async {
-    spriteImage = await Flame.images.load('trex.png');
     add(horizon);
     add(player);
     add(gameOverPanel);
@@ -57,7 +83,7 @@ class TRexGame extends FlameGame
     const chars = '0123456789HI ';
     final renderer = SpriteFontRenderer.fromFont(
       SpriteFont(
-        source: spriteImage,
+        source: game.spriteImage,
         size: 23,
         ascent: 23,
         glyphs: [
@@ -76,28 +102,14 @@ class TRexGame extends FlameGame
     score = 0;
   }
 
-  GameState state = GameState.intro;
-  double currentSpeed = 0.0;
-  double timePlaying = 0.0;
-
-  final double acceleration = 5;
-  final double maxSpeed = 2500.0;
-  final double startSpeed = 400;
-
-  bool get isPlaying => state == GameState.playing;
-  bool get isGameOver => state == GameState.gameOver;
-  bool get isIntro => state == GameState.intro;
-
   @override
-  KeyEventResult onKeyEvent(
-    KeyEvent event,
-    Set<LogicalKeyboardKey> keysPressed,
-  ) {
+  bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (keysPressed.contains(LogicalKeyboardKey.enter) ||
         keysPressed.contains(LogicalKeyboardKey.space)) {
       onAction();
+      return false;
     }
-    return KeyEventResult.handled;
+    return true;
   }
 
   @override
@@ -106,48 +118,48 @@ class TRexGame extends FlameGame
   }
 
   void onAction() {
-    if (isGameOver || isIntro) {
+    if (game.isGameOver || game.isIntro) {
       restart();
       return;
     }
-    player.jump(currentSpeed);
+    player.jump(game.currentSpeed);
   }
 
   void gameOver() {
     gameOverPanel.visible = true;
-    state = GameState.gameOver;
+    game.state = GameState.gameOver;
     player.current = PlayerState.crashed;
-    currentSpeed = 0.0;
+    game.currentSpeed = 0.0;
   }
 
   void restart() {
-    state = GameState.playing;
+    game.state = GameState.playing;
     player.reset();
     horizon.reset();
-    currentSpeed = startSpeed;
+    game.currentSpeed = startSpeed;
     gameOverPanel.visible = false;
-    timePlaying = 0.0;
-    if (score > _highScore) {
-      _highScore = score;
+    game.timePlaying = 0.0;
+    if (game.score > game._highScore) {
+      game._highScore = game.score;
     }
     score = 0;
-    _distanceTraveled = 0;
+    game._distanceTraveled = 0;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    if (isGameOver) {
+    if (game.isGameOver) {
       return;
     }
 
-    if (isPlaying) {
-      timePlaying += dt;
-      _distanceTraveled += dt * currentSpeed;
-      score = _distanceTraveled ~/ 50;
+    if (game.isPlaying) {
+      game.timePlaying += dt;
+      game._distanceTraveled += dt * game.currentSpeed;
+      score = game._distanceTraveled ~/ 50;
 
-      if (currentSpeed < maxSpeed) {
-        currentSpeed += acceleration * dt;
+      if (game.currentSpeed < maxSpeed) {
+        game.currentSpeed += acceleration * dt;
       }
     }
   }

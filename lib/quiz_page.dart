@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
@@ -20,10 +22,29 @@ class _MyQuizState extends State<MyQuiz> {
   BuildContext navContext = NavigationService.navigatorKey.currentContext!;
   late List<QuizQuestion> questions;
 
+  QuizQuestion get getQuizQuestion =>
+      questions[questionIndex % questions.length];
+  Map<String, String> getOptions() {
+    Random random = Random();
+    final Map<String, String> questionOptions = {...getQuizQuestion.getOptions};
+    Map<String, String> randomQuestionOptions = {};
+    int loop = questionOptions.length;
+
+    for (var i = 0; i < loop; i++) {
+      int nextInt = random.nextInt(questionOptions.length);
+      MapEntry<String, String> randomQuestionOption = questionOptions.entries
+          .elementAt(nextInt);
+      questionOptions.removeWhere((k, v) => randomQuestionOption.key == k);
+      randomQuestionOptions.addEntries([randomQuestionOption]);
+    }
+
+    return randomQuestionOptions;
+  }
+
   void setAnswer(String key) {
     final QuizQuestion question = questions[questionIndex % questions.length];
     QuizAnswers answer = QuizAnswers(
-      id: questionIndex,
+      id: question.getId,
       question: question,
       answer: key,
     );
@@ -49,7 +70,8 @@ class _MyQuizState extends State<MyQuiz> {
 
   @override
   void initState() {
-    questions = Provider.of<GeminiQuizService>(navContext).questions;
+    questions = [...Provider.of<GeminiQuizService>(navContext).questions];
+    questions.shuffle();
     super.initState();
   }
 
@@ -176,6 +198,7 @@ class _MyQuizState extends State<MyQuiz> {
           label: 'restart',
           isActive: false,
           onPressed: () {
+            questions.shuffle();
             setState(() {
               questionIndex = 0;
               answers = [];
@@ -188,8 +211,7 @@ class _MyQuizState extends State<MyQuiz> {
   }
 
   Column renderQuiz(BuildContext context) {
-    final QuizQuestion question = questions[questionIndex % questions.length];
-    final Map<String, String> questionOptions = question.getOptions;
+    final Map<String, String> randomQuestionOptions = getOptions();
     return Column(
       children: [
         Expanded(
@@ -199,7 +221,7 @@ class _MyQuizState extends State<MyQuiz> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  question.getQuestion,
+                  getQuizQuestion.getQuestion,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
@@ -208,11 +230,13 @@ class _MyQuizState extends State<MyQuiz> {
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: questionOptions.length,
+            itemCount: randomQuestionOptions.length,
             itemBuilder: (BuildContext context, index) {
               // optionItem = questionOptions.;
-              String buttonKey = questionOptions.keys.elementAt(index);
-              String buttonLabel = questionOptions.values.elementAt(index);
+              String buttonKey = randomQuestionOptions.keys.elementAt(index);
+              String buttonLabel = randomQuestionOptions.values.elementAt(
+                index,
+              );
               return MyButton(
                 label: buttonLabel,
                 isActive: false,

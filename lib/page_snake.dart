@@ -14,7 +14,7 @@ class SnakeGamePage extends StatefulWidget {
 }
 
 class _SnakeGamePageState extends State<SnakeGamePage> {
-  final SnakeGame game = SnakeGame();
+  // final SnakeGame game = SnakeGame();
   late Timer timer;
 
   void startTimer() {
@@ -41,7 +41,10 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
     return Scaffold(
       body: Container(
         color: Colors.lightBlue,
-        child: GameWidget(game: game),
+        child: GameWidget(
+          game: SnakeGame(),
+          loadingBuilder: (_) => const Center(child: Text('Loading')),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => {

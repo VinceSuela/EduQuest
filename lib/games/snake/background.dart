@@ -6,6 +6,7 @@ class Background extends RectangleComponent {
   Background()
     : super(
         size: gameScreen,
-        paint: Paint()..color = Color.fromARGB(255, 244, 246, 248),
+        paint: Paint()
+          ..color = Color(0xFF47B9FF), // Color.fromARGB(255, 244, 246, 248),
       );
 }

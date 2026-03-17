@@ -5,7 +5,10 @@ import 'package:flutter_pomodoro/games/trex/trex_game.dart';
 enum PlayerState { crashed, jumping, running, waiting }
 
 class Player extends SpriteAnimationGroupComponent<PlayerState>
-    with HasGameReference<TRexGame>, CollisionCallbacks {
+    with
+        HasGameReference<TRexGame>,
+        HasWorldReference<TRexGameWorld>,
+        CollisionCallbacks {
   Player() : super(size: Vector2(90, 88));
 
   final double gravity = 0.85;
@@ -105,7 +108,7 @@ class Player extends SpriteAnimationGroupComponent<PlayerState>
     PositionComponent other,
   ) {
     super.onCollisionStart(intersectionPoints, other);
-    game.gameOver();
+    world.gameOver();
   }
 
   SpriteAnimation _getAnimation({

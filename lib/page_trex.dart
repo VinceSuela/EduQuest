@@ -14,7 +14,7 @@ class TrexGamePage extends StatefulWidget {
 }
 
 class _TrexGamePageState extends State<TrexGamePage> {
-  final TRexGame game = TRexGame();
+  // final TRexGame game = TRexGame();
   late Timer timer;
 
   void startTimer() {
@@ -40,8 +40,13 @@ class _TrexGamePageState extends State<TrexGamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.lightBlue,
-        child: GameWidget(game: game),
+        color: Colors.black,
+        child: ClipRRect(
+          child: GameWidget(
+            game: TRexGame(),
+            loadingBuilder: (_) => const Center(child: Text('Loading')),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => {

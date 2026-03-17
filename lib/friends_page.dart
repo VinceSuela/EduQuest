@@ -48,43 +48,39 @@ class FriendsPage extends StatelessWidget {
               child: ListView.builder(
                 itemCount: 20,
                 itemBuilder: (context, index) {
-                  return Container(
-                    child: Card(
-                      child: Row(
-                        children: [
-                          Card(
-                            color: Color(0xFF47B9FF),
-                            child: FittedBox(
-                              fit: .scaleDown,
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: Center(
-                                  child: Icon(Icons.person, size: 50),
-                                ),
+                  return Card(
+                    child: Row(
+                      children: [
+                        Card(
+                          color: Color(0xFF47B9FF),
+                          child: FittedBox(
+                            fit: .scaleDown,
+                            child: SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: Center(
+                                child: Icon(Icons.person, size: 50),
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              children: [
-                                FittedBox(
-                                  fit: .scaleDown,
-                                  child: Text(
-                                    generator.generate(),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                  ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Column(
+                            crossAxisAlignment: .start,
+                            children: [
+                              FittedBox(
+                                fit: .scaleDown,
+                                child: Text(
+                                  generator.generate(),
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
-                                Text('Points'),
-                              ],
-                            ),
+                              ),
+                              Text('Points'),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 },

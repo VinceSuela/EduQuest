@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro/constant.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -43,8 +42,12 @@ class GeminiQuizService with ChangeNotifier {
         }
 
         decodedList = jsonDecode(response.text!);
-        print(extractedText);
-        print(response.text!);
+        if (kDebugMode) {
+          print(extractedText);
+        }
+        if (kDebugMode) {
+          print(response.text!);
+        }
       }
 
       _questions = decodedList
@@ -53,7 +56,9 @@ class GeminiQuizService with ChangeNotifier {
       notifyListeners();
       return _questions;
     } catch (e) {
-      print("Error generating quiz: $e");
+      if (kDebugMode) {
+        print("Error generating quiz: $e");
+      }
       rethrow;
     }
   }
