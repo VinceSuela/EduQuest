@@ -136,28 +136,28 @@ class _MyQuizState extends State<MyQuiz> {
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-                                Text(answer.getQuestion.getQuestion),
+                                Text(
+                                  answer.getQuestion.getQuestion,
+                                  textAlign: .center,
+                                ),
                                 Divider(),
                                 Column(
                                   children: [
                                     Text(
                                       !isCorrect
-                                          ? 'Your answer is'
-                                          : 'Your answer is correct',
+                                          ? 'Your answer is '
+                                          : 'Your answer is correct ',
+                                      textAlign: .start,
                                     ),
 
-                                    Text.rich(
+                                    Text(
+                                      answer.getQuestion.getOptions[answerKey]
+                                          .toString(),
                                       textAlign: .center,
                                       style: TextStyle(
                                         color: isCorrect
                                             ? Colors.green[900]
                                             : Colors.red[900],
-                                      ),
-                                      TextSpan(
-                                        text: answer
-                                            .getQuestion
-                                            .getOptions[answerKey]
-                                            .toString(),
                                       ),
                                     ),
                                   ],
@@ -167,16 +167,14 @@ class _MyQuizState extends State<MyQuiz> {
                                   child: Column(
                                     children: [
                                       Text('Correct answer is '),
-                                      Text.rich(
+                                      Text(
+                                        answer
+                                            .getQuestion
+                                            .getOptions[correctKey]
+                                            .toString(),
                                         textAlign: .center,
                                         style: TextStyle(
                                           color: Colors.green[900],
-                                        ),
-                                        TextSpan(
-                                          text: answer
-                                              .getQuestion
-                                              .getOptions[correctKey]
-                                              .toString(),
                                         ),
                                       ),
                                     ],
@@ -222,14 +220,21 @@ class _MyQuizState extends State<MyQuiz> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   getQuizQuestion.getQuestion,
+                  textAlign: .center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
             ),
           ),
         ),
-        Expanded(
-          child: ListView.builder(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.25,
+            ),
             itemCount: randomQuestionOptions.length,
             itemBuilder: (BuildContext context, index) {
               // optionItem = questionOptions.;
@@ -237,12 +242,23 @@ class _MyQuizState extends State<MyQuiz> {
               String buttonLabel = randomQuestionOptions.values.elementAt(
                 index,
               );
-              return MyButton(
-                label: buttonLabel,
-                isActive: false,
-                onPressed: () {
+              return GestureDetector(
+                onTap: () {
                   setAnswer(buttonKey);
                 },
+                child: Card.filled(
+                  elevation: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Text(
+                        buttonLabel,
+                        textAlign: .center,
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ),
+                ),
               );
             },
           ),

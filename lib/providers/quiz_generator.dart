@@ -13,7 +13,11 @@ class GeminiQuizService with ChangeNotifier {
 
   Future<List<QuizQuestion>> generateQuizFromBytes(Uint8List pdfBytes) async {
     List<dynamic> decodedList;
+
     try {
+      if (_questions.isNotEmpty) {
+        return _questions;
+      }
       if (debug) {
         await Future.delayed(const Duration(seconds: 3));
         decodedList = jsonDecode(sample);

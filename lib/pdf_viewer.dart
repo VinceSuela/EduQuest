@@ -171,33 +171,91 @@ class _PinchPageState extends State<PinchPage> {
         child: Column(
           children: [
             Expanded(
-              child: Column(
-                children: [
-                  MyButton(
-                    label: 'Flappy Bird',
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      Navigator.pushReplacementNamed(context, '/flappy');
-                    },
-                    isActive: false,
+              child: SizedBox(
+                height: .infinity,
+                child: Center(
+                  child: GridView(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 0.75,
+                    ),
+                    children: [
+                      Card(
+                        elevation: 8,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(dialogContext);
+                            Navigator.pushReplacementNamed(context, '/flappy');
+                          },
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Card.filled(
+                                  color: Colors.blueAccent,
+                                  child: SizedBox(
+                                    width: .infinity,
+
+                                    child: Center(child: Text('Flappy Bird')),
+                                  ),
+                                ),
+                              ),
+                              Text('Flappy Bird'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Card(
+                        elevation: 8,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(dialogContext);
+                            Navigator.pushReplacementNamed(context, '/snake');
+                          },
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Card.filled(
+                                  color: Colors.amber,
+                                  child: SizedBox(
+                                    width: .infinity,
+
+                                    child: Center(child: Text('Snake')),
+                                  ),
+                                ),
+                              ),
+                              Text('Snake'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Card(
+                        elevation: 8,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(dialogContext);
+                            Navigator.pushReplacementNamed(context, '/trex');
+                          },
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Card.filled(
+                                  color: Colors.white,
+                                  child: SizedBox(
+                                    width: .infinity,
+
+                                    child: Center(child: Text('Trex')),
+                                  ),
+                                ),
+                              ),
+                              Text('Trex'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  MyButton(
-                    label: 'Snake',
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      Navigator.pushReplacementNamed(context, '/snake');
-                    },
-                    isActive: false,
-                  ),
-                  MyButton(
-                    label: 'Trex',
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      Navigator.pushReplacementNamed(context, '/trex');
-                    },
-                    isActive: false,
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -213,42 +271,43 @@ class _PinchPageState extends State<PinchPage> {
               label: 'Test your knowledge',
               isActive: true,
               onPressed: () async {
-                final myFile = Provider.of<MyFile>(context, listen: false);
-
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) =>
-                      const Center(child: CircularProgressIndicator()),
-                );
-
-                try {
-                  await Provider.of<GeminiQuizService>(
-                    NavigationService.navigatorKey.currentContext!,
-                    listen: false,
-                  ).generateQuizFromBytes(myFile.bytes);
-
-                  if (context.mounted) Navigator.pop(context);
-
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(
-                      NavigationService.navigatorKey.currentContext!,
-                      '/quiz',
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) Navigator.pop(context);
-                  ScaffoldMessenger.of(
-                    NavigationService.navigatorKey.currentContext!,
-                  ).showSnackBar(
-                    SnackBar(content: Text("Failed to generate quiz: $e")),
-                  );
-                }
+                await enterQuiz(context);
               },
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> enterQuiz(BuildContext context) async {
+    final myFile = Provider.of<MyFile>(context, listen: false);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await Provider.of<GeminiQuizService>(
+        NavigationService.navigatorKey.currentContext!,
+        listen: false,
+      ).generateQuizFromBytes(myFile.bytes);
+
+      if (context.mounted) Navigator.pop(context);
+
+      if (context.mounted) {
+        Navigator.pushReplacementNamed(
+          NavigationService.navigatorKey.currentContext!,
+          '/quiz',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      ScaffoldMessenger.of(
+        NavigationService.navigatorKey.currentContext!,
+      ).showSnackBar(SnackBar(content: Text("Failed to generate quiz: $e")));
+    }
   }
 }
