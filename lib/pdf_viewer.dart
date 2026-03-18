@@ -190,17 +190,29 @@ class _PinchPageState extends State<PinchPage> {
                           },
                           child: Column(
                             children: [
-                              Expanded(
-                                child: Card.filled(
-                                  color: Colors.blueAccent,
-                                  child: SizedBox(
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
                                     width: .infinity,
-
-                                    child: Center(child: Text('Flappy Bird')),
+                                    height: .infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(30),
+                                      ),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          'images/bird-icon.png',
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                              Text('Flappy Bird'),
+                              Expanded(
+                                child: Center(child: Text('Flappy Bird')),
+                              ),
                             ],
                           ),
                         ),
@@ -214,17 +226,27 @@ class _PinchPageState extends State<PinchPage> {
                           },
                           child: Column(
                             children: [
-                              Expanded(
-                                child: Card.filled(
-                                  color: Colors.amber,
-                                  child: SizedBox(
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
                                     width: .infinity,
-
-                                    child: Center(child: Text('Snake')),
+                                    height: .infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(30),
+                                      ),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          'images/snake-icon.png',
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                              Text('Snake'),
+                              Expanded(child: Center(child: Text('Snake'))),
                             ],
                           ),
                         ),
@@ -238,17 +260,27 @@ class _PinchPageState extends State<PinchPage> {
                           },
                           child: Column(
                             children: [
-                              Expanded(
-                                child: Card.filled(
-                                  color: Colors.white,
-                                  child: SizedBox(
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
                                     width: .infinity,
-
-                                    child: Center(child: Text('Trex')),
+                                    height: .infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(30),
+                                      ),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          'images/trex-icon.png',
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                              Text('Trex'),
+                              Expanded(child: Center(child: Text('Trex'))),
                             ],
                           ),
                         ),
