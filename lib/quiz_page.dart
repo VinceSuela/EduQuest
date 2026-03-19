@@ -229,38 +229,42 @@ class _MyQuizState extends State<MyQuiz> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.25,
-            ),
-            itemCount: randomQuestionOptions.length,
-            itemBuilder: (BuildContext context, index) {
-              // optionItem = questionOptions.;
-              String buttonKey = randomQuestionOptions.keys.elementAt(index);
-              String buttonLabel = randomQuestionOptions.values.elementAt(
-                index,
-              );
-              return GestureDetector(
-                onTap: () {
-                  setAnswer(buttonKey);
-                },
-                child: Card.filled(
-                  elevation: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Text(
-                        buttonLabel,
-                        textAlign: .center,
-                        style: TextStyle(fontSize: 15),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(),
+            child: GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: MediaQuery.sizeOf(context).width > 600 ? 4 : 2,
+                childAspectRatio: 1.25,
+              ),
+              itemCount: randomQuestionOptions.length,
+              itemBuilder: (BuildContext context, index) {
+                // optionItem = questionOptions.;
+                String buttonKey = randomQuestionOptions.keys.elementAt(index);
+                String buttonLabel = randomQuestionOptions.values.elementAt(
+                  index,
+                );
+                print(MediaQuery.sizeOf(context).width);
+                return GestureDetector(
+                  onTap: () {
+                    setAnswer(buttonKey);
+                  },
+                  child: Card.filled(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          buttonLabel,
+                          textAlign: .center,
+                          style: TextStyle(fontSize: 15),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ],

@@ -29,6 +29,7 @@ class _PinchPageState extends State<PinchPage> {
   final Duration duration = Duration(seconds: 5);
   late DateTime endTime = DateTime.now().add(learnDuration);
   String remainingTime = '';
+  bool hideFloatingButton = false;
 
   @override
   void initState() {
@@ -63,6 +64,9 @@ class _PinchPageState extends State<PinchPage> {
     endTime = DateTime.now().add(learnDuration);
     timer = Timer(learnDuration, () {
       showBreakTime(navContext);
+      setState(() {
+        hideFloatingButton = true;
+      });
     });
     timerDisplay = Timer.periodic(Duration(seconds: 1), (currentTime) {
       setState(() {
@@ -72,6 +76,9 @@ class _PinchPageState extends State<PinchPage> {
         }
         remainingTime = formatDuration(remaining).toString();
       });
+    });
+    setState(() {
+      hideFloatingButton = false;
     });
   }
 
@@ -158,6 +165,15 @@ class _PinchPageState extends State<PinchPage> {
           errorBuilder: (_, error) => Center(child: Text(error.toString())),
         ),
         controller: _pdfControllerPinch,
+      ),
+      floatingActionButton: Visibility(
+        visible: !hideFloatingButton,
+
+        child: FloatingActionButton(
+          tooltip: 'Test your knowledge',
+          onPressed: () => {enterQuiz(context)},
+          child: Icon(Icons.quiz),
+        ),
       ),
     );
   }
