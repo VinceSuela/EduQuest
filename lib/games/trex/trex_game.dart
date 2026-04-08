@@ -9,7 +9,6 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame/text.dart';
-import 'package:flutter/material.dart' hide Image;
 import 'package:flutter/services.dart';
 import 'package:flutter_pomodoro/games/trex/background/horizon.dart';
 import 'package:flutter_pomodoro/games/trex/constant.dart';

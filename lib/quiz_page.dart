@@ -244,7 +244,6 @@ class _MyQuizState extends State<MyQuiz> {
                 String buttonLabel = randomQuestionOptions.values.elementAt(
                   index,
                 );
-                print(MediaQuery.sizeOf(context).width);
                 return GestureDetector(
                   onTap: () {
                     setAnswer(buttonKey);
