@@ -1,5 +1,6 @@
 import 'dart:async';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
@@ -7,6 +8,9 @@ import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/widgets/my_quiz_dialog.dart';
 import 'package:flutter_pomodoro/widgets/paint.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_pomodoro/services/quiz_service.dart';
+import 'package:flutter_pomodoro/providers/quiz_generator.dart';
+import 'dart:typed_data';
 
 class BottomNavigation extends StatelessWidget {
   final bool hideBottomNav;
@@ -89,19 +93,115 @@ class ReviewQuizes extends StatelessWidget {
     );
   }
 
-  Future<String?> showQuiz(BuildContext context) {
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext dialogContext) => MyQuizDialog(
-        child: Center(
-          child: Text(
-            'Content here',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+  Future<void> showQuiz(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser;
+
+  return showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return MyQuizDialog(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () {
+                      // This pops the Dialog specifically
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 48.0),
+                        child: Text(
+                          'My Quizzes',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: user == null 
+                ? const Center(child: Text("Please log in to see quizzes"))
+                : StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('generatedQuizzes')
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      final docs = snapshot.data!.docs;
+
+                      if (docs.isEmpty) {
+                        return const Center(child: Text("No quizzes generated yet."));
+                      }
+
+                      return ListView.builder(
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final data = docs[index].data() as Map<String, dynamic>;
+                          final fileName = data['fileName'] ?? 'Untitled PDF';
+                          final date = (data['createdAt'] as Timestamp?)?.toDate();
+
+                          return ListTile(
+                            leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
+                            title: Text(fileName, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            subtitle: Text(date != null 
+                                ? "${date.day}/${date.month}/${date.year}" 
+                                : "Just now"),
+                            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                            onTap: () async {
+                              final data = docs[index].data() as Map<String, dynamic>;
+                              final blob = data['pdf'] as Blob?;
+                              final fileName = data['fileName'] ?? 'Untitled.pdf';
+                              final questionsData = data['questions'] as List<dynamic>?;
+
+                                if (questionsData != null) {
+                                  final quizService = Provider.of<GeminiQuizService>(context, listen: false);
+                                  quizService.loadExistingQuestions(questionsData); 
+                                }
+                              if (blob != null) {
+                                Uint8List pdfBytes = blob.bytes;
+
+                                final navContext = NavigationService.navigatorKey.currentContext!;
+                                final myFileProvider = Provider.of<MyFile>(navContext, listen: false);
+
+                                myFileProvider.setFileFromBytes(pdfBytes, fileName);
+
+                                Navigator.pop(dialogContext);
+
+                                Navigator.of(navContext).pushReplacementNamed('/pdfViewer');
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Error: PDF data not found in this save.")),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 }
 
 class GenerateQuiz extends StatelessWidget {
@@ -112,15 +212,23 @@ class GenerateQuiz extends StatelessWidget {
     return Flexible(
       flex: 3,
       child: GestureDetector(
-        onTap: () {
-          if (Provider.of<MyFile>(
-            NavigationService.navigatorKey.currentContext!,
-            listen: false,
-          ).name.isNotEmpty) {
-            Navigator.pushReplacementNamed(
+        onTap: () async {
+          FilePickerResult? result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['pdf'],
+            withData: true,
+          );
+
+          if (result != null) {
+            if (!context.mounted) return;
+            PlatformFile file = result.files.single;
+            Provider.of<MyFile>(
               NavigationService.navigatorKey.currentContext!,
-              '/pdfViewer',
-            );
+              listen: false,
+            ).setFile(file, result.files.single.name);
+            await generateQuizFromPdf(context);
+          } else {
+            return;
           }
         },
         child: Padding(

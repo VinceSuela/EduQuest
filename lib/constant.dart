@@ -1,7 +1,7 @@
 final Duration gameDuration = Duration(minutes: 1);
 final Duration learnDuration = Duration(seconds: 5);
 final String apiKey = '';
-final bool debug = true;
+final bool debug = false;
 
 const String prompt = '''
 You are an Educational Content Creator. Your task is to analyze the provided document and generate a multiple-choice quiz that accurately reflects its specific subject matter.

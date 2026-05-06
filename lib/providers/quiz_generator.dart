@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro/constant.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -8,19 +9,22 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class GeminiQuizService with ChangeNotifier {
   List<QuizQuestion> _questions = List.empty();
+  String? _lastAiResponse;
 
   List<QuizQuestion> get questions => _questions;
+  String? get lastAiResponse => _lastAiResponse;
 
   Future<List<QuizQuestion>> generateQuizFromBytes(Uint8List pdfBytes) async {
-    List<dynamic> decodedList;
+    if (_questions.isNotEmpty) {
+      return _questions;
+    }
 
     try {
-      if (_questions.isNotEmpty) {
-        return _questions;
-      }
+      late String rawResponse;
+
       if (debug) {
         await Future.delayed(const Duration(seconds: 3));
-        decodedList = jsonDecode(sample);
+        rawResponse = sample;
       } else {
         final String extractedText = await _extractTextFromBytes(pdfBytes);
 
@@ -45,17 +49,21 @@ class GeminiQuizService with ChangeNotifier {
           throw Exception("AI returned empty response");
         }
 
-        decodedList = jsonDecode(response.text!);
+        rawResponse = response.text!;
         if (kDebugMode) {
           print(extractedText);
-        }
-        if (kDebugMode) {
-          print(response.text!);
+          print(rawResponse);
         }
       }
 
-      _questions = decodedList
-          .map((json) => QuizQuestion.fromJson(json))
+      _lastAiResponse = rawResponse;
+      final decoded = jsonDecode(rawResponse);
+      if (decoded is! List) {
+        throw Exception('AI response is not a JSON list of questions');
+      }
+
+      _questions = decoded
+          .map((item) => QuizQuestion.fromJson(Map<String, dynamic>.from(item)))
           .toList();
       notifyListeners();
       return _questions;
@@ -73,6 +81,13 @@ class GeminiQuizService with ChangeNotifier {
     document.dispose();
     return text;
   }
+
+  void loadExistingQuestions(List<dynamic> jsonList) {
+    _questions = jsonList
+        .map((item) => QuizQuestion.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
+    notifyListeners();
+  }
 }
 
 class QuizQuestion {
@@ -89,11 +104,19 @@ class QuizQuestion {
   });
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
+    final rawOptions = json['options'];
+    final options = <String, String>{};
+    if (rawOptions is Map) {
+      rawOptions.forEach((key, value) {
+        options['$key'] = value?.toString() ?? '';
+      });
+    }
+
     return QuizQuestion(
-      id: json['id'],
-      question: json['question'],
-      options: Map<String, String>.from(json['options']),
-      answer: json['answer'],
+      id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
+      question: json['question']?.toString() ?? '',
+      options: options,
+      answer: json['answer']?.toString() ?? '',
     );
   }
 
@@ -101,6 +124,15 @@ class QuizQuestion {
   String get getQuestion => question;
   Map<String, String> get getOptions => options;
   String get getAnswer => answer;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'question': question,
+      'options': options,
+      'answer': answer,
+    };
+  }
 }
 
 class QuizAnswers {

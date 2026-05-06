@@ -63,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '611935945594',
     projectId: 'eduquest-a2922',
     storageBucket: 'eduquest-a2922.firebasestorage.app',
+    iosClientId: '611935945594-nfch0pi6tq7ljmell17dns17rmgo0nfn.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterPomodoro',
   );
 
@@ -72,6 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '611935945594',
     projectId: 'eduquest-a2922',
     storageBucket: 'eduquest-a2922.firebasestorage.app',
+    iosClientId: '611935945594-nfch0pi6tq7ljmell17dns17rmgo0nfn.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterPomodoro',
   );
 

@@ -8,7 +8,9 @@ class MyFile with ChangeNotifier {
   late String _name;
   Uint8List _bytes = Uint8List(0);
   int _page = 1;
+  bool _isReviewMode = false;
 
+  bool get isReviewMode => _isReviewMode;
   String get path => File(_pdf.path!).path;
   Uint8List get bytes => Uint8List.fromList(_bytes);
   String get name => _name;
@@ -19,12 +21,20 @@ class MyFile with ChangeNotifier {
     _pdf = file;
     _name = name;
     _page = 1;
+    _isReviewMode = false;
 
     if (file.bytes != null) {
       _bytes = file.bytes!;
     } else if (file.path != null) {
       _bytes = File(file.path!).readAsBytesSync();
     }
+    notifyListeners();
+  }
+
+  void setFileFromBytes(Uint8List bytes, String fileName) {
+    _bytes = bytes;
+    _name = fileName;
+    _isReviewMode = true;
     notifyListeners();
   }
 

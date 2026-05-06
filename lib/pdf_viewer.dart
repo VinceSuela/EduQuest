@@ -10,6 +10,7 @@ import 'package:flutter_pomodoro/widgets/my_dialog.dart';
 import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_pomodoro/services/quiz_service.dart';
 
 class PinchPage extends StatefulWidget {
   const PinchPage({super.key});
@@ -121,7 +122,7 @@ class _PinchPageState extends State<PinchPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pushReplacementNamed(context, '/home');
+              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
           },
         ),
         actions: <Widget>[
@@ -171,7 +172,7 @@ class _PinchPageState extends State<PinchPage> {
 
         child: FloatingActionButton(
           tooltip: 'Test your knowledge',
-          onPressed: () => {enterQuiz(context)},
+          onPressed: () => {generateQuizFromPdf(context)},
           child: Icon(Icons.quiz),
         ),
       ),
@@ -319,43 +320,12 @@ class _PinchPageState extends State<PinchPage> {
               label: 'Test your knowledge',
               isActive: true,
               onPressed: () async {
-                await enterQuiz(context);
+                await generateQuizFromPdf(context);
               },
             ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> enterQuiz(BuildContext context) async {
-    final myFile = Provider.of<MyFile>(context, listen: false);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      await Provider.of<GeminiQuizService>(
-        NavigationService.navigatorKey.currentContext!,
-        listen: false,
-      ).generateQuizFromBytes(myFile.bytes);
-
-      if (context.mounted) Navigator.pop(context);
-
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(
-          NavigationService.navigatorKey.currentContext!,
-          '/quiz',
-        );
-      }
-    } catch (e) {
-      if (context.mounted) Navigator.pop(context);
-      ScaffoldMessenger.of(
-        NavigationService.navigatorKey.currentContext!,
-      ).showSnackBar(SnackBar(content: Text("Failed to generate quiz: $e")));
-    }
   }
 }
