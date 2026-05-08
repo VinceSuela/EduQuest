@@ -20,6 +20,10 @@ import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/splash_page.dart';
 import 'package:flutter_pomodoro/quiz_page.dart';
 import 'package:provider/provider.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:flutter_pomodoro/models/quiz_question.dart';
+import 'package:flutter_pomodoro/models/quiz_session.dart';
+import 'package:flutter_pomodoro/leaderboard_page.dart';
 // import 'package:file_picker/file_picker.dart';
 
 bool shouldUseFirebaseEmulator = false;
@@ -27,6 +31,15 @@ late final FirebaseApp app;
 late final FirebaseAuth auth;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(QuizQuestionHiveAdapter());
+  Hive.registerAdapter(QuizSessionAdapter());
+
+  await Future.wait([
+    Hive.openBox<QuizSession>('quiz_sessions'),
+    Hive.openBox('user_stats'),
+  ]);
 
   app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -93,6 +106,7 @@ class _MyAppState extends State<MyApp> {
         '/snake': (context) => SnakeGamePage(),
         '/trex': (context) => TrexGamePage(),
         '/quiz': (context) => MyQuiz(),
+        '/leaderboard': (context) => LeaderboardPage(),
       },
     );
   }

@@ -23,7 +23,7 @@ enum DocShown { sample, tutorial, hello, password }
 
 class _PinchPageState extends State<PinchPage> {
   int initialPage = 1;
-  late PdfControllerPinch _pdfControllerPinch;
+  PdfControllerPinch? _pdfControllerPinch;
   late Uint8List bytes;
   late Timer timer;
   late Timer timerDisplay;
@@ -33,31 +33,40 @@ class _PinchPageState extends State<PinchPage> {
   bool hideFloatingButton = false;
 
   @override
+  @override
   void initState() {
-    BuildContext navContext = NavigationService.navigatorKey.currentContext!;
-
-    bytes = Provider.of<MyFile>(navContext).bytes;
-
-    startTimer();
-    initialPage = Provider.of<MyFile>(navContext).page;
-    if (kIsWeb) {
-      _pdfControllerPinch = PdfControllerPinch(
-        document: PdfDocument.openData(bytes),
-        initialPage: initialPage,
-      );
-    } else {
-      _pdfControllerPinch = PdfControllerPinch(
-        document: PdfDocument.openFile(Provider.of<MyFile>(navContext).path),
-        initialPage: initialPage,
-      );
-    }
-    _pdfControllerPinch.addListener(() {
-      Provider.of<MyFile>(
-        navContext,
-        listen: false,
-      ).setPage(_pdfControllerPinch.page);
-    });
     super.initState();
+    // Start timers and basic logic
+    startTimer();
+
+    // Initialize PDF safely
+    _preparePdf();
+  }
+
+  Future<void> _preparePdf() async {
+    BuildContext navContext = NavigationService.navigatorKey.currentContext!;
+    final fileProvider = Provider.of<MyFile>(navContext, listen: false);
+
+    setState(() {
+      if (kIsWeb) {
+        _pdfControllerPinch = PdfControllerPinch(
+          document: PdfDocument.openData(fileProvider.bytes),
+          initialPage: fileProvider.page,
+        );
+      } else {
+        _pdfControllerPinch = PdfControllerPinch(
+          document: PdfDocument.openFile(fileProvider.path),
+          initialPage: fileProvider.page,
+        );
+      }
+
+      _pdfControllerPinch!.addListener(() {
+        Provider.of<MyFile>(
+          navContext,
+          listen: false,
+        ).setPage(_pdfControllerPinch!.page);
+      });
+    });
   }
 
   void startTimer() {
@@ -98,7 +107,7 @@ class _PinchPageState extends State<PinchPage> {
   void dispose() {
     timer.cancel();
     timerDisplay.cancel();
-    _pdfControllerPinch.dispose();
+    _pdfControllerPinch?.dispose();
     super.dispose();
   }
 
@@ -122,21 +131,25 @@ class _PinchPageState extends State<PinchPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+              (route) => false,
+            );
           },
         ),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.navigate_before),
-            onPressed: () {
-              _pdfControllerPinch.previousPage(
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 100),
-              );
-            },
+            onPressed: _pdfControllerPinch == null
+                ? null
+                : () => _pdfControllerPinch!.previousPage(
+                    curve: Curves.ease,
+                    duration: const Duration(milliseconds: 100),
+                  ),
           ),
           PdfPageNumber(
-            controller: _pdfControllerPinch,
+            controller: _pdfControllerPinch!,
             builder: (_, loadingState, page, pagesCount) => Container(
               alignment: Alignment.center,
               child: Text(
@@ -147,32 +160,37 @@ class _PinchPageState extends State<PinchPage> {
           ),
           IconButton(
             icon: const Icon(Icons.navigate_next),
-            onPressed: () {
-              _pdfControllerPinch.nextPage(
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 100),
-              );
-            },
+            onPressed: _pdfControllerPinch == null
+                ? null
+                : () => _pdfControllerPinch?.nextPage(
+                    curve: Curves.ease,
+                    duration: const Duration(milliseconds: 100),
+                  ),
           ),
         ],
       ),
-      body: PdfViewPinch(
-        builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
-          options: const DefaultBuilderOptions(),
-          documentLoaderBuilder: (_) =>
-              const Center(child: CircularProgressIndicator()),
-          pageLoaderBuilder: (_) =>
-              const Center(child: CircularProgressIndicator()),
-          errorBuilder: (_, error) => Center(child: Text(error.toString())),
-        ),
-        controller: _pdfControllerPinch,
-      ),
+      body: _pdfControllerPinch == null
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : PdfViewPinch(
+              builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
+                options: const DefaultBuilderOptions(),
+                documentLoaderBuilder: (_) =>
+                    const Center(child: CircularProgressIndicator()),
+                pageLoaderBuilder: (_) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorBuilder: (_, error) =>
+                    Center(child: Text(error.toString())),
+              ),
+              controller: _pdfControllerPinch!,
+            ),
       floatingActionButton: Visibility(
         visible: !hideFloatingButton,
 
         child: FloatingActionButton(
           tooltip: 'Test your knowledge',
-          onPressed: () => {generateQuizFromPdf(context)},
+          onPressed: () async {
+                await generateQuizFromPdf(context);
+              },
           child: Icon(Icons.quiz),
         ),
       ),

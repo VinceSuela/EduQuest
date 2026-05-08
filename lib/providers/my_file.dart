@@ -42,4 +42,24 @@ class MyFile with ChangeNotifier {
     _page = page;
     // notifyListeners();
   }
+
+  void setReviewMode(bool isReview) {
+    _isReviewMode = isReview;
+    notifyListeners();
+  }
+
+  void reset() {
+    _bytes = Uint8List(0);
+    _name = '';
+    _pdf = PlatformFile(
+      name: '',
+      path: '',
+      size: 0,
+      bytes: Uint8List(0),
+    );
+    _page = 1;
+    _isReviewMode = false;
+    notifyListeners();
+  }
+
 }
