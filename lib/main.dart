@@ -1,4 +1,5 @@
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,12 @@ Future<void> main() async {
   app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+  );
+
   auth = FirebaseAuth.instanceFor(app: app);
 
   if (shouldUseFirebaseEmulator) {
@@ -83,7 +90,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: NavigationService.navigatorKey,
-      title: 'Flutter Demo',
+      title: 'EduQuest',
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.lightBlueAccent),
         fontFamily: 'Baloo2',

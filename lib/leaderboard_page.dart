@@ -36,8 +36,9 @@ class LeaderboardEntry {
     String currentUid,
   ) {
     final email = data['userEmail'] as String? ?? '';
-    final username =
-        email.contains('@') ? '@${email.split('@')[0]}' : '@unknown';
+    final username = email.contains('@')
+        ? '@${email.split('@')[0]}'
+        : '@unknown';
 
     return LeaderboardEntry(
       rank: rank,
@@ -53,7 +54,7 @@ class LeaderboardEntry {
   }
 }
 
-const Color _gold   = Color(0xFFFFC107);
+const Color _gold = Color(0xFFFFC107);
 const Color _silver = Color(0xFFB0BEC5);
 const Color _bronze = Color(0xFFBF8970);
 
@@ -102,7 +103,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Error — log the REAL error, show helpful message 
+          // Error — log the REAL error, show helpful message
           if (snapshot.hasError) {
             final err = snapshot.error;
             dev.log(
@@ -113,7 +114,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
 
             // Check for common Firestore index error
             final errStr = err.toString();
-            final needsIndex = errStr.contains('index') ||
+            final needsIndex =
+                errStr.contains('index') ||
                 errStr.contains('FAILED_PRECONDITION');
 
             return Center(
@@ -122,8 +124,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline,
-                        color: Colors.red[300], size: 48),
+                    Icon(Icons.error_outline, color: Colors.red[300], size: 48),
                     const SizedBox(height: 12),
                     Text(
                       needsIndex
@@ -136,7 +137,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     Text(
                       needsIndex
                           ? 'Check your debug console for a Firestore link to create the required index. '
-                            'It only takes one click.'
+                                'It only takes one click.'
                           : 'Check your connection and try again.\n\nError: $err',
                       style: Theme.of(context).textTheme.bodySmall,
                       textAlign: TextAlign.center,
@@ -159,7 +160,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           }).toList();
 
           final top3 = entries.take(3).toList();
-          final rest  = entries.skip(3).toList();
+          final rest = entries.skip(3).toList();
 
           final podiumOrder = top3.length == 3
               ? [top3[1], top3[0], top3[2]]
@@ -197,8 +198,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -209,7 +211,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                   ),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20)),
+                      top: Radius.circular(20),
+                    ),
                     child: rest.isEmpty
                         ? const Center(child: Text('Top 3 only this week!'))
                         : ListView.separated(
@@ -221,14 +224,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                               endIndent: 16,
                               color: Colors.grey.withOpacity(0.2),
                             ),
-                            itemBuilder: (_, i) =>
-                                _RankRow(entry: rest[i]),
+                            itemBuilder: (_, i) => _RankRow(entry: rest[i]),
                           ),
                   ),
                 ),
               ),
-              _MyRankFooter(
-                  entry: myEntry, storageService: _storageService),
+              _MyRankFooter(entry: myEntry, storageService: _storageService),
             ],
           );
         },
@@ -237,7 +238,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   }
 }
 
-// Podium 
+// Podium
 class _PodiumCard extends StatelessWidget {
   final LeaderboardEntry entry;
   const _PodiumCard({required this.entry});
@@ -247,6 +248,7 @@ class _PodiumCard extends StatelessWidget {
     if (entry.rank == 2) return 28;
     return 44;
   }
+
   double get _avatarSize => entry.rank == 1 ? 72 : 56;
 
   @override
@@ -257,8 +259,7 @@ class _PodiumCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (entry.rank == 1)
-            const Text('👑', style: TextStyle(fontSize: 22)),
+          if (entry.rank == 1) const Text('👑', style: TextStyle(fontSize: 22)),
           AvatarWidget(
             displayName: entry.displayName,
             avatarAssetPath: entry.avatarAssetPath,
@@ -269,25 +270,49 @@ class _PodiumCard extends StatelessWidget {
           Transform.translate(
             offset: const Offset(0, -10),
             child: Container(
-              width: 22, height: 22,
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
-                color: medal, shape: BoxShape.circle,
-                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                color: medal,
+                shape: BoxShape.circle,
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 4),
+                ],
               ),
               child: Center(
-                child: Text('${entry.rank}',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: Text(
+                  '${entry.rank}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
-          Text(entry.displayName,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis),
-          Text(entry.score.toStringAsFixed(1),
-              style: TextStyle(fontSize: entry.rank == 1 ? 20 : 15, fontWeight: FontWeight.bold, color: medal)),
-          Text(entry.username,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
-              overflow: TextOverflow.ellipsis),
+          Text(
+            entry.displayName,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            entry.score.toStringAsFixed(1),
+            style: TextStyle(
+              fontSize: entry.rank == 1 ? 20 : 15,
+              fontWeight: FontWeight.bold,
+              color: medal,
+            ),
+          ),
+          Text(
+            entry.username,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -303,50 +328,84 @@ class _RankRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMe = entry.isCurrentUser;
     return Container(
-      color: isMe ? Theme.of(context).colorScheme.primary.withOpacity(0.07) : null,
+      color: isMe
+          ? Theme.of(context).colorScheme.primary.withOpacity(0.07)
+          : null,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           SizedBox(
             width: 28,
-            child: Text('${entry.rank}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey),
-                textAlign: TextAlign.center),
+            child: Text(
+              '${entry.rank}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(width: 10),
-          AvatarWidget(displayName: entry.displayName, avatarAssetPath: entry.avatarAssetPath, size: 42),
+          AvatarWidget(
+            displayName: entry.displayName,
+            avatarAssetPath: entry.avatarAssetPath,
+            size: 42,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [
-                  Flexible(
-                    child: Text(entry.displayName,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  if (isMe) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(10),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        entry.displayName,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      child: const Text('You', style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
+                    if (isMe) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'You',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ]),
-                Text(entry.username,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                ),
+                Text(
+                  entry.username,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
               ],
             ),
           ),
-          Text(entry.score.toStringAsFixed(1),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isMe ? Theme.of(context).colorScheme.primary : null)),
+          Text(
+            entry.score.toStringAsFixed(1),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isMe ? Theme.of(context).colorScheme.primary : null,
+            ),
+          ),
         ],
       ),
     );
@@ -369,16 +428,26 @@ class _MyRankFooter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.10), blurRadius: 8, offset: const Offset(0, -2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           SizedBox(
             width: 28,
-            child: Text(entry.rank > 0 ? '#${entry.rank}' : '—',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                textAlign: TextAlign.center),
+            child: Text(
+              entry.rank > 0 ? '#${entry.rank}' : '—',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(width: 10),
           AvatarWidget(
@@ -393,22 +462,37 @@ class _MyRankFooter extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(entry.displayName,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis),
+                Text(
+                  entry.displayName,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
                 if (!meetsThreshold)
-                  Text('${70 - totalAnswered} more questions to rank',
-                      style: TextStyle(fontSize: 11, color: Colors.orange[700])),
+                  Text(
+                    '${70 - totalAnswered} more questions to rank',
+                    style: TextStyle(fontSize: 11, color: Colors.orange[700]),
+                  ),
               ],
             ),
           ),
           meetsThreshold
-              ? Text(entry.score.toStringAsFixed(1),
+              ? Text(
+                  entry.score.toStringAsFixed(1),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary))
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                )
               : Tooltip(
                   message: 'Answer 70+ questions to appear on the leaderboard',
-                  child: Icon(Icons.lock_outline, color: Colors.grey[400], size: 20)),
+                  child: Icon(
+                    Icons.lock_outline,
+                    color: Colors.grey[400],
+                    size: 20,
+                  ),
+                ),
         ],
       ),
     );
@@ -432,8 +516,11 @@ class _EmptyLeaderboard extends StatelessWidget {
           children: [
             const Text('🏆', style: TextStyle(fontSize: 64)),
             const SizedBox(height: 16),
-            Text('No rankings yet this week',
-                style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
+            Text(
+              'No rankings yet this week',
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
             Text(
               totalAnswered < 70

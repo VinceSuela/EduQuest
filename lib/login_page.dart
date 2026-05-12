@@ -96,8 +96,8 @@ class _LoginPageState extends State<LoginPage> {
       if (credentials.user?.email != null) {
         if (context.mounted) Navigator.pop(context);
         setState(() {
-                formView = .login;
-              });
+          formView = .login;
+        });
         showMyDialog('Account created successfully. Please log in.');
       }
     } on FirebaseAuthException catch (e) {

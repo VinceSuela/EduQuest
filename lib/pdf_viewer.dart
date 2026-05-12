@@ -44,20 +44,29 @@ class _PinchPageState extends State<PinchPage> {
   }
 
   Future<void> _preparePdf() async {
-    BuildContext navContext = NavigationService.navigatorKey.currentContext!;
+    final BuildContext navContext =
+        NavigationService.navigatorKey.currentContext!;
     final fileProvider = Provider.of<MyFile>(navContext, listen: false);
 
     setState(() {
-      if (kIsWeb) {
+      // Show loading state while preparing PDF
+      if (fileProvider.bytes.isNotEmpty) {
         _pdfControllerPinch = PdfControllerPinch(
           document: PdfDocument.openData(fileProvider.bytes),
           initialPage: fileProvider.page,
         );
-      } else {
+      } else if (!kIsWeb && fileProvider.path.isNotEmpty) {
+        // Fallback for native platforms with a valid file path
         _pdfControllerPinch = PdfControllerPinch(
           document: PdfDocument.openFile(fileProvider.path),
           initialPage: fileProvider.page,
         );
+      } else {
+        // Nothing to open — navigate back rather than crash
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(navContext, '/home');
+        });
+        return;
       }
 
       _pdfControllerPinch!.addListener(() {
@@ -189,8 +198,8 @@ class _PinchPageState extends State<PinchPage> {
         child: FloatingActionButton(
           tooltip: 'Test your knowledge',
           onPressed: () async {
-                await generateQuizFromPdf(context);
-              },
+            await generateQuizFromPdf(context);
+          },
           child: Icon(Icons.quiz),
         ),
       ),

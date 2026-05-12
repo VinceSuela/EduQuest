@@ -1,20 +1,26 @@
 import 'dart:math';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/providers/avatar_utils.dart';
 import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   final String title = 'LEADERBOARD';
 
 // Position avatars based on rank and user ID to create a dynamic but consistent layout
   @override
   Widget build(BuildContext context) {
     final storage = QuizStorageService();
+    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? ''; 
 
     return MyLayout(
       title: title,
@@ -37,10 +43,9 @@ class MyHomePage extends StatelessWidget {
 
           final docs = snapshot.data?.docs ?? [];
 
-          final users = docs.asMap().entries.map((entry) {
+          final allUsers = docs.asMap().entries.map((entry) {
             final index = entry.key;
             final data = entry.value.data() as Map<String, dynamic>;
-
             return RankedAvatarData(
               uid: data['uid'] ?? '',
               rank: index + 1,
@@ -49,6 +54,19 @@ class MyHomePage extends StatelessWidget {
               score: (data['score'] as num?)?.toDouble() ?? 0,
             );
           }).toList();
+
+          final users = allUsers.where((u) => u.uid == currentUid).toList();
+
+          if (users.isEmpty && currentUid.isNotEmpty) {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            users.add(RankedAvatarData(
+              uid: currentUid,
+              rank: 51, // unranked — maps to base of triangle
+              displayName: currentUser?.displayName ?? 'You',
+              avatarPath: currentUser?.photoURL,
+              score: 0,
+            ));
+          }
 
           return Center(
             child: Padding(
@@ -89,6 +107,7 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
+
 class RankedAvatarData {
   final String uid;
   final int rank;
@@ -117,8 +136,10 @@ class _RankedAvatar extends StatelessWidget {
     required this.triangleHeight,
   });
 
+  // Normalize Y position based on rank (1 at top, 50 at bottom, 51+ just below)
   double get normalizedY {
-    return ((user.rank - 1) / 49).clamp(0.02, 0.95);
+    if (user.rank > 50) return 0.88;
+    return ((user.rank - 1) / 49).clamp(0.02, 0.88);
   }
 
   @override
@@ -188,7 +209,7 @@ class _RankedAvatar extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '#${user.rank}',
+              user.rank > 50 ? 'unranked' : '#${user.rank}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 10,
@@ -275,131 +296,4 @@ class TrianglePainter extends CustomPainter {
     return oldDelegate.color != color;
   }
 }
-
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_pomodoro/providers/counter.dart';
-// import 'package:flutter_pomodoro/widgets/layout.dart';
-// import 'package:flutter_pomodoro/widgets/my_button.dart';
-// import 'package:flutter_pomodoro/widgets/my_card.dart';
-// import 'package:flutter_pomodoro/widgets/my_dialog.dart';
-// import 'package:flutter_pomodoro/widgets/paint.dart';
-// import 'package:provider/provider.dart';
-
-// class MyHomePage extends StatelessWidget {
-//   const MyHomePage({super.key});
-
-//   final String title = 'LEADERBOARD';
-
-//   // String getCount(BuildContext context) {
-//   //   return Provider.of<MyCounter>(context).count.toString();
-//   // }
-
-//   // void increase(BuildContext context) {
-//   //   return Provider.of<MyCounter>(context, listen: false).increment();
-//   // }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return MyLayout(
-  //     title: title,
-  //     hideBottomNav: false,
-  //     child: Container(
-  //       padding: const EdgeInsets.all(16.0),
-  //       child: Column(
-  //         children: [
-  //           CustomPaint(
-  //             painter: TrianglePainter(color: Colors.blue),
-  //             child: SizedBox(height: 663 * 0.7, width: 265 * 0.7),
-  //           )
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-
-//   // MyCard newMethod(BuildContext context) {
-//   //   return MyCard(
-//   //     child: ListView(
-//   //       children: [
-//   //         Center(
-//   //           child: Text(
-//   //             getCount(context),
-//   //             key: const Key('counterState'),
-//   //             style: Theme.of(context).textTheme.headlineMedium,
-//   //           ),
-//   //         ),
-//   //         MyButton(
-//   //           label: 'Sample answer here.',
-//   //           onPressed: () {
-//   //             Navigator.pushNamed(context, '/profile');
-//   //           },
-//   //           isActive: false,
-//   //         ),
-
-//   //         MyButton(
-//   //           label: '++',
-//   //           onPressed: () {
-//   //             increase(context);
-//   //           },
-//   //           isActive: true,
-//   //         ),
-//   //         MyButton(
-//   //           label: 'alert',
-//   //           onPressed: () => showMyDialog(context),
-//   //           isActive: false,
-//   //         ),
-//   //         MyButton(
-//   //           label: 'Logout',
-//   //           onPressed: () {
-//   //             FirebaseAuth.instance.signOut();
-//   //             Navigator.pushNamed(context, '/login');
-//   //           },
-//   //           isActive: false,
-//   //         ),
-//   //         MyButton(
-//   //           label: 'Flappy Bird',
-//   //           onPressed: () {
-//   //             Navigator.pushNamed(context, '/flappy');
-//   //           },
-//   //           isActive: false,
-//   //         ),
-//   //         MyButton(
-//   //           label: 'Snake',
-//   //           onPressed: () {
-//   //             Navigator.pushNamed(context, '/snake');
-//   //           },
-//   //           isActive: false,
-//   //         ),
-//   //         MyButton(
-//   //           label: 'Trex',
-//   //           onPressed: () {
-//   //             Navigator.pushNamed(context, '/trex');
-//   //           },
-//   //           isActive: false,
-//   //         ),
-//   //       ],
-//   //     ),
-//   //   );
-//   // }
-
-//   // Future<String?> showMyDialog(BuildContext context) {
-//   //   return showDialog<String>(
-//   //     context: context,
-//   //     builder: (BuildContext context) => MyDialog(
-//   //       title: 'About EduQuest',
-//   //       child: Consumer<MyCounter>(
-//   //         builder: (context, myCounter, child) {
-//   //           return Text(
-//   //             myCounter.count.toString(),
-//   //             key: const Key('counterState'),
-//   //             style: Theme.of(context).textTheme.headlineMedium,
-//   //           );
-//   //         },
-//   //       ),
-//   //     ),
-//   //   );
-//   // }
-// }
 

@@ -13,29 +13,31 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 String generatePdfHash(Uint8List bytes) {
-  final safeBytes = Uint8List.fromList(bytes);
-  return sha256.convert(safeBytes).toString();
+  // No Uint8List.fromList copy here — caller already holds a safe defensive copy
+  return sha256.convert(bytes).toString();
 }
 
 Future<void> generateQuizFromPdf(BuildContext context) async {
-  final myFile = Provider.of<MyFile>(context, listen: false);
+  final myFile      = Provider.of<MyFile>(context, listen: false);
   final quizService = Provider.of<GeminiQuizService>(context, listen: false);
   final currentUser = FirebaseAuth.instance.currentUser;
-  final navContext = NavigationService.navigatorKey.currentContext!;
+  final navContext  = NavigationService.navigatorKey.currentContext!;
 
   if (currentUser == null) {
     _showErrorSnackBar(navContext, "Please login first.");
     return;
   }
 
+  // Always clear stale questions before any quiz flow
   quizService.clearQuestions();
 
   _showLoadingDialog(context);
 
   try {
-    final uid = currentUser.uid;
+    final uid     = currentUser.uid;
     final pdfHash = generatePdfHash(myFile.bytes);
 
+    // ── Cache check: direct doc lookup by pdfHash (no query, no index needed) ──
     final existing = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -44,32 +46,35 @@ Future<void> generateQuizFromPdf(BuildContext context) async {
         .get();
 
     if (existing.exists) {
-      final data = existing.data()!;
+      final data         = existing.data()!;
       final questionsData = data['questions'] as List<dynamic>?;
 
       if (questionsData != null && questionsData.isNotEmpty) {
+        // Cache hit — load questions, skip AI
         quizService.loadExistingQuestions(questionsData);
-
-        if (context.mounted) Navigator.pop(context); 
+        if (context.mounted) Navigator.pop(context);
         Navigator.pushNamed(navContext, '/quiz');
         return;
       }
     }
 
+    // Cache miss — generate new quiz via AI
     final questions = await quizService.generateQuizFromBytes(myFile.bytes);
 
     if (questions.isEmpty) {
       throw Exception("Quiz generation failed — AI returned no questions.");
     }
 
+    // Persist to Firestore — pdfHash is the doc ID (prevents duplicates)
+    // Blob is always stored so Review mode can load the PDF on any device
     await _persistQuizData(
-      uid: uid,
-      userEmail: currentUser.email,
-      pdfBytes: myFile.bytes,
-      fileName: myFile.name,
-      questions: questions,
+      uid:        uid,
+      userEmail:  currentUser.email,
+      pdfBytes:   myFile.bytes,
+      fileName:   myFile.name,
+      questions:  questions,
       aiResponse: quizService.lastAiResponse ?? '',
-      pdfHash: pdfHash,
+      pdfHash:    pdfHash,
     );
 
     if (context.mounted) Navigator.pop(context);
@@ -77,7 +82,10 @@ Future<void> generateQuizFromPdf(BuildContext context) async {
   } catch (e, stack) {
     log("Quiz Workflow Error: $e", stackTrace: stack);
     if (context.mounted) Navigator.pop(context);
-    _showErrorSnackBar(navContext, "Failed to generate quiz due to many users requesting simultaneously. Please try again in a minute.");
+    _showErrorSnackBar(
+      navContext,
+      "Failed to generate quiz. Please try again in a moment.",
+    );
   }
 }
 
@@ -97,14 +105,14 @@ Future<void> _persistQuizData({
       .doc(pdfHash);
 
   await docRef.set({
-    'fileName': fileName,
+    'fileName':  fileName,
     'userEmail': userEmail ?? 'Anonymous',
     'createdAt': FieldValue.serverTimestamp(),
     'aiResponse': aiResponse,
     'questions': questions.map((q) => q.toJson()).toList(),
-    'pdfSize': pdfBytes.length,
-    'pdf': pdfBytes.isNotEmpty ? Blob(pdfBytes) : null,
-    'pdfHash': pdfHash,
+    'pdfSize':   pdfBytes.length,
+    'pdf':       pdfBytes.isNotEmpty ? Blob(pdfBytes) : null,
+    'pdfHash':   pdfHash,
   });
 }
 
