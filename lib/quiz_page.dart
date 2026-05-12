@@ -1,8 +1,13 @@
+// lib/quiz_page.dart
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/models/quiz_question.dart';
+import 'package:flutter_pomodoro/models/quiz_session.dart';
+import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
+import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
+import 'package:flutter_pomodoro/services/quiz_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_quiz_dialog.dart';
@@ -17,6 +22,7 @@ class MyQuiz extends StatefulWidget {
 
 class _MyQuizState extends State<MyQuiz> {
   bool showScore = false;
+  bool _sessionSaved = false;
   int questionIndex = 0;
   List<QuizAnswers> answers = [];
   BuildContext navContext = NavigationService.navigatorKey.currentContext!;
@@ -24,16 +30,17 @@ class _MyQuizState extends State<MyQuiz> {
 
   QuizQuestion get getQuizQuestion =>
       questions[questionIndex % questions.length];
+
   Map<String, String> getOptions() {
-    Random random = Random();
+    final Random random = Random();
     final Map<String, String> questionOptions = {...getQuizQuestion.getOptions};
-    Map<String, String> randomQuestionOptions = {};
-    int loop = questionOptions.length;
+    final Map<String, String> randomQuestionOptions = {};
+    final int loop = questionOptions.length;
 
     for (var i = 0; i < loop; i++) {
-      int nextInt = random.nextInt(questionOptions.length);
-      MapEntry<String, String> randomQuestionOption = questionOptions.entries
-          .elementAt(nextInt);
+      final int nextInt = random.nextInt(questionOptions.length);
+      final MapEntry<String, String> randomQuestionOption =
+          questionOptions.entries.elementAt(nextInt);
       questionOptions.removeWhere((k, v) => randomQuestionOption.key == k);
       randomQuestionOptions.addEntries([randomQuestionOption]);
     }
@@ -42,30 +49,48 @@ class _MyQuizState extends State<MyQuiz> {
   }
 
   void setAnswer(String key) {
-    final QuizQuestion question = questions[questionIndex % questions.length];
-    QuizAnswers answer = QuizAnswers(
-      id: question.getId,
-      question: question,
-      answer: key,
-    );
-    answers.add(answer);
+    final QuizQuestion question =
+        questions[questionIndex % questions.length];
+    answers.add(QuizAnswers(id: question.getId, question: question, answer: key));
+
     setState(() {
       if (questionIndex >= questions.length - 1) {
         showScore = true;
+        _saveSessionOnce();
       } else {
         questionIndex++;
       }
     });
   }
 
-  int getScores() {
-    int score = 0;
-    for (QuizAnswers answer in answers) {
-      if (answer.isCorrect) {
-        score++;
-      }
-    }
-    return score;
+  int getScores() =>
+      answers.where((a) => a.isCorrect).length;
+
+  // Save the quiz session to local storage, ensuring it's only saved once per completion.
+  void _saveSessionOnce() {
+    if (_sessionSaved) return;
+    _sessionSaved = true;
+
+    final myFile = Provider.of<MyFile>(navContext, listen: false);
+
+    // Convert answers to the key list QuizSession expects
+    final userAnswerKeys = answers.map((a) => a.getAnswer).toList();
+
+    // Convert QuizQuestion → QuizQuestionHive
+    final hiveQuestions = questions
+        .map((q) => QuizQuestionHive.fromQuizQuestion(q, difficulty: 'medium'))
+        .toList();
+
+    final session = QuizSession.create(
+      sourceFileName: myFile.name,
+      questions: hiveQuestions,
+      userAnswerKeys: userAnswerKeys,
+      difficulty: 'medium',
+    );
+
+    final pdfHash = myFile.currentHash;
+
+    QuizStorageService().saveSession(session, pdfHash: pdfHash);
   }
 
   @override
@@ -88,6 +113,7 @@ class _MyQuizState extends State<MyQuiz> {
     );
   }
 
+  // Result screen with score and breakdown
   Column renderResult(BuildContext context) {
     return Column(
       children: [
@@ -98,19 +124,30 @@ class _MyQuizState extends State<MyQuiz> {
                 elevation: 8,
                 color: Colors.cyan[100],
                 child: Column(
-                  mainAxisAlignment: .center,
-                  crossAxisAlignment: .stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Center(
                       child: Text(
-                        'Your Score ',
+                        'Your Score',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
                     Center(
                       child: Text(
-                        getScores().toString(),
-                        style: TextStyle(fontSize: 30),
+                        '${getScores()} / ${questions.length}',
+                        style: const TextStyle(fontSize: 30),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        '${(getScores() / questions.length * 100).toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: getScores() / questions.length >= 0.7
+                              ? Colors.green[700]
+                              : Colors.red[700],
+                        ),
                       ),
                     ),
                   ],
@@ -119,17 +156,17 @@ class _MyQuizState extends State<MyQuiz> {
 
               Expanded(
                 child: Card.filled(
-                  color: Color(0xFF888888),
+                  color: const Color(0xFF888888),
                   child: Card(
-                    clipBehavior: .hardEdge,
+                    clipBehavior: Clip.hardEdge,
                     child: ListView.builder(
                       itemCount: answers.length,
                       itemBuilder: (BuildContext context, index) {
-                        QuizAnswers answer = answers[index];
-                        String answerKey = answer.getAnswer;
-                        String correctKey = answer.getQuestion.getAnswer;
-                        bool isCorrect = answer.isCorrect;
-                        // answer.getQuestion.getOptions[answerKey].toString();
+                        final QuizAnswers answer = answers[index];
+                        final String answerKey  = answer.getAnswer;
+                        final String correctKey = answer.getQuestion.getAnswer;
+                        final bool isCorrect    = answer.isCorrect;
+
                         return Card(
                           color: isCorrect ? Colors.green[50] : Colors.red[50],
                           child: Padding(
@@ -138,22 +175,21 @@ class _MyQuizState extends State<MyQuiz> {
                               children: [
                                 Text(
                                   answer.getQuestion.getQuestion,
-                                  textAlign: .center,
+                                  textAlign: TextAlign.center,
                                 ),
-                                Divider(),
+                                const Divider(),
                                 Column(
                                   children: [
                                     Text(
-                                      !isCorrect
-                                          ? 'Your answer is '
-                                          : 'Your answer is correct ',
-                                      textAlign: .start,
+                                      isCorrect
+                                          ? 'Your answer is correct ✓'
+                                          : 'Your answer is',
+                                      textAlign: TextAlign.start,
                                     ),
-
                                     Text(
                                       answer.getQuestion.getOptions[answerKey]
-                                          .toString(),
-                                      textAlign: .center,
+                                              .toString(),
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: isCorrect
                                             ? Colors.green[900]
@@ -166,16 +202,12 @@ class _MyQuizState extends State<MyQuiz> {
                                   visible: !isCorrect,
                                   child: Column(
                                     children: [
-                                      Text('Correct answer is '),
+                                      const Text('Correct answer is'),
                                       Text(
-                                        answer
-                                            .getQuestion
-                                            .getOptions[correctKey]
-                                            .toString(),
-                                        textAlign: .center,
-                                        style: TextStyle(
-                                          color: Colors.green[900],
-                                        ),
+                                        answer.getQuestion.getOptions[correctKey]
+                                                .toString(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: Colors.green[900]),
                                       ),
                                     ],
                                   ),
@@ -192,15 +224,17 @@ class _MyQuizState extends State<MyQuiz> {
             ],
           ),
         ),
+
         MyButton(
-          label: 'restart',
+          label: 'Restart',
           isActive: false,
           onPressed: () {
             questions.shuffle();
             setState(() {
-              questionIndex = 0;
-              answers = [];
-              showScore = false;
+              questionIndex  = 0;
+              answers        = [];
+              showScore      = false;
+              _sessionSaved  = false;
             });
           },
         ),
@@ -208,6 +242,7 @@ class _MyQuizState extends State<MyQuiz> {
     );
   }
 
+// Quiz screen with question and options
   Column renderQuiz(BuildContext context) {
     final Map<String, String> randomQuestionOptions = getOptions();
     return Column(
@@ -216,13 +251,10 @@ class _MyQuizState extends State<MyQuiz> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  getQuizQuestion.getQuestion,
-                  textAlign: .center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+              child: Text(
+                getQuizQuestion.getQuestion,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
           ),
@@ -230,24 +262,22 @@ class _MyQuizState extends State<MyQuiz> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ConstrainedBox(
-            constraints: BoxConstraints(),
+            constraints: const BoxConstraints(),
             child: GridView.builder(
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.sizeOf(context).width > 600 ? 4 : 2,
+                crossAxisCount:
+                    MediaQuery.sizeOf(context).width > 600 ? 4 : 2,
                 childAspectRatio: 1.25,
               ),
               itemCount: randomQuestionOptions.length,
               itemBuilder: (BuildContext context, index) {
-                // optionItem = questionOptions.;
-                String buttonKey = randomQuestionOptions.keys.elementAt(index);
-                String buttonLabel = randomQuestionOptions.values.elementAt(
-                  index,
-                );
+                final String buttonKey =
+                    randomQuestionOptions.keys.elementAt(index);
+                final String buttonLabel =
+                    randomQuestionOptions.values.elementAt(index);
                 return GestureDetector(
-                  onTap: () {
-                    setAnswer(buttonKey);
-                  },
+                  onTap: () => setAnswer(buttonKey),
                   child: Card.filled(
                     elevation: 3,
                     child: Padding(
@@ -255,8 +285,8 @@ class _MyQuizState extends State<MyQuiz> {
                       child: Center(
                         child: Text(
                           buttonLabel,
-                          textAlign: .center,
-                          style: TextStyle(fontSize: 15),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 15),
                         ),
                       ),
                     ),

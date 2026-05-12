@@ -11,7 +11,7 @@ class SideNav extends StatelessWidget {
     return !hideSideNav
         ? Container(
             padding: .symmetric(horizontal: 2),
-            height: 290,
+            height: 250,
             child: Column(
               mainAxisAlignment: .spaceEvenly,
               children: [
@@ -23,10 +23,10 @@ class SideNav extends StatelessWidget {
                   onPressed: () => {showAbout(context)},
                   icon: Icon(Icons.question_mark, size: 36),
                 ),
-                IconButton(
-                  onPressed: () => {Navigator.pushNamed(context, '/friends')},
-                  icon: Icon(Icons.people, size: 36),
-                ),
+                // IconButton(
+                //   onPressed: () => {Navigator.pushNamed(context, '/friends')},
+                //   icon: Icon(Icons.people, size: 36),
+                // ),
                 IconButton(
                   onPressed: () => {Navigator.pushNamed(context, '/profile')},
                   icon: Icon(Icons.person, size: 36),

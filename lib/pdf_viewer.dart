@@ -238,7 +238,7 @@ class _PinchPageState extends State<PinchPage> {
                                       ),
                                       image: DecorationImage(
                                         image: AssetImage(
-                                          'images/bird-icon.png',
+                                          'assets/images/bird-icon.png',
                                         ),
                                       ),
                                     ),
@@ -274,7 +274,7 @@ class _PinchPageState extends State<PinchPage> {
                                       ),
                                       image: DecorationImage(
                                         image: AssetImage(
-                                          'images/snake-icon.png',
+                                          'assets/images/snake-icon.png',
                                         ),
                                       ),
                                     ),
@@ -308,7 +308,7 @@ class _PinchPageState extends State<PinchPage> {
                                       ),
                                       image: DecorationImage(
                                         image: AssetImage(
-                                          'images/trex-icon.png',
+                                          'assets/images/trex-icon.png',
                                         ),
                                       ),
                                     ),

@@ -3,12 +3,10 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_pomodoro/constant.dart';
 
 class ApiKeyService {
   static const String _apiKeyName = 'gemini_api_key';
-
-  static const String _appSecret =
-      '';
 
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -38,7 +36,7 @@ class ApiKeyService {
   }
 
   static enc.Key _deriveKey(String uid) {
-    final bytes = utf8.encode('$uid$_appSecret');
+    final bytes = utf8.encode('$uid$appSecret');
     final hash = sha256.convert(bytes);
     return enc.Key(Uint8List.fromList(hash.bytes));
   }

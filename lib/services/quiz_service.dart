@@ -77,7 +77,7 @@ Future<void> generateQuizFromPdf(BuildContext context) async {
   } catch (e, stack) {
     log("Quiz Workflow Error: $e", stackTrace: stack);
     if (context.mounted) Navigator.pop(context);
-    _showErrorSnackBar(navContext, e.toString());
+    _showErrorSnackBar(navContext, "Failed to generate quiz due to many users requesting simultaneously. Please try again in a minute.");
   }
 }
 

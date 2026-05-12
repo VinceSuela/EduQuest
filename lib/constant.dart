@@ -1,6 +1,8 @@
 final Duration gameDuration = Duration(minutes: 1);
 final Duration learnDuration = Duration(seconds: 10);
 final String apiKey = '';
+const String appSecret =
+      '';
 final bool debug = false;
 
 const String prompt = '''
