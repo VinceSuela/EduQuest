@@ -1,5 +1,6 @@
 // lib/services/quiz_service.dart
 import 'dart:developer';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +16,10 @@ import 'package:crypto/crypto.dart';
 String generatePdfHash(Uint8List bytes) {
   // No Uint8List.fromList copy here — caller already holds a safe defensive copy
   return sha256.convert(bytes).toString();
+}
+
+Future<String> generatePdfHashAsync(Uint8List bytes) async {
+  return await Isolate.run(() => sha256.convert(bytes).toString());
 }
 
 Future<void> generateQuizFromPdf(BuildContext context) async {
@@ -35,7 +40,7 @@ Future<void> generateQuizFromPdf(BuildContext context) async {
 
   try {
     final uid     = currentUser.uid;
-    final pdfHash = generatePdfHash(myFile.bytes);
+    final pdfHash = await generatePdfHashAsync(myFile.bytes);
 
     // ── Cache check: direct doc lookup by pdfHash (no query, no index needed) ──
     final existing = await FirebaseFirestore.instance

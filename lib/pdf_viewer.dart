@@ -68,13 +68,9 @@ class _PinchPageState extends State<PinchPage> {
         });
         return;
       }
-
-      _pdfControllerPinch!.addListener(() {
-        Provider.of<MyFile>(
-          navContext,
-          listen: false,
-        ).setPage(_pdfControllerPinch!.page);
-      });
+      
+      _pdfControllerPinch!.addListener(_onPageChanged);
+      
     });
   }
 
@@ -116,8 +112,17 @@ class _PinchPageState extends State<PinchPage> {
   void dispose() {
     timer.cancel();
     timerDisplay.cancel();
+    // Remove listener BEFORE disposing controller
+    _pdfControllerPinch?.removeListener(_onPageChanged);
     _pdfControllerPinch?.dispose();
     super.dispose();
+  }
+  
+  void _onPageChanged() {
+    Provider.of<MyFile>(
+      NavigationService.navigatorKey.currentContext!,
+      listen: false,
+    ).setPage(_pdfControllerPinch!.page);
   }
 
   @override

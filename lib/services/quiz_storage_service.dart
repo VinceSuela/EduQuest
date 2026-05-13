@@ -8,6 +8,14 @@ import '../models/quiz_session.dart';
 // This service manages quiz session storage, lifetime stats, and weekly leaderboard
 // stats using Hive for local persistence and Firestore for syncing leaderboard data.
 class QuizStorageService {
+  // Singleton pattern to ensure a single instance throughout the app
+  static final QuizStorageService _instance = QuizStorageService._internal();
+  factory QuizStorageService() => _instance;
+  QuizStorageService._internal();
+
+  // In-memory cache for the current week's leaderboard data to minimize Firestore reads during a session.
+  Map<String, dynamic>? _weeklyCache;
+
   // Hive box names
   static const String _sessionsBox = 'quiz_sessions';
   static const String _statsBox = 'user_stats';
@@ -347,16 +355,18 @@ class QuizStorageService {
 
   // Helper methods to load and save the weekly data JSON blob in Hive.
   Map<String, dynamic> _getWeeklyData() {
+    if (_weeklyCache != null) return _weeklyCache!;
     final raw = _stats.get(keyWeeklyData) as String?;
-    if (raw == null) return {};
+    if (raw == null) return _weeklyCache = {};
     try {
-      return Map<String, dynamic>.from(jsonDecode(raw));
+      return _weeklyCache = Map<String, dynamic>.from(jsonDecode(raw));
     } catch (_) {
-      return {};
+      return _weeklyCache = {};
     }
   }
 
   Future<void> _saveWeeklyData(Map<String, dynamic> data) async {
+    _weeklyCache = data;
     await _stats.put(keyWeeklyData, jsonEncode(data));
   }
 }
