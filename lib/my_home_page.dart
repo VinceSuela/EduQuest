@@ -15,6 +15,22 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final String title = 'LEADERBOARD';
+  late final String _weekLabel;
+  late final Stream<QuerySnapshot> _leaderStream;
+
+  // Compute the current week label based on PHT timezone (UTC+8)
+  @override
+  void initState() {
+    super.initState();
+    _weekLabel = QuizStorageService().currentWeekLabel; // computed once
+    _leaderStream = FirebaseFirestore.instance
+        .collection('leaderboard')
+        .doc('weekly')
+        .collection(_weekLabel)
+        .orderBy('score', descending: true)
+        .limit(50)
+        .snapshots();
+  }
 
 // Position avatars based on rank and user ID to create a dynamic but consistent layout
   @override

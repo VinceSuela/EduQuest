@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:flutter_pomodoro/constant.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
+import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 
 import 'games/flappy/game.dart';
 
@@ -18,9 +19,23 @@ class _FlappyBirdPageState extends State<FlappyBirdPage> {
   // final FlappyBirdGame game = FlappyBirdGame();
   late Timer timer;
 
+  PomodoroPreset _getCurrentPomodoroPreset() {
+    final settings = QuizStorageService();
+
+    final savedLabel = settings.loadPomodoroPreset();
+
+    return pomodoroPresets.firstWhere(
+      (preset) => preset.label == savedLabel,
+      orElse: () => pomodoroPresets.first,
+    );
+  }
+
   void startTimer() {
     BuildContext navContext = NavigationService.navigatorKey.currentContext!;
-    timer = Timer(gameDuration, () {
+    final preset = _getCurrentPomodoroPreset();
+
+    final gameBreak = preset.breakDuration;
+    timer = Timer(gameBreak, () {
       Navigator.pushReplacementNamed(navContext, '/pdfViewer');
     });
   }

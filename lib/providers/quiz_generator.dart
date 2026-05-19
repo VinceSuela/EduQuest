@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro/constant.dart';
 import 'package:flutter_pomodoro/services/api_key_service.dart';
+import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -23,6 +24,15 @@ class GeminiQuizService with ChangeNotifier {
         await Future.delayed(const Duration(seconds: 3));
         rawResponse = sample;
       } else {
+        final storage = QuizStorageService();
+        final difficultyString = storage.loadDifficulty();
+
+        final difficulty = QuizDifficulty.values.firstWhere(
+          (e) => e.name == difficultyString,
+          orElse: () => QuizDifficulty.medium,
+        );
+
+        final prompt = buildQuizPrompt(difficulty);
         final resolvedKey = await ApiKeyService.getApiKey();
 
         if (resolvedKey == null || resolvedKey.isEmpty) {
@@ -90,6 +100,12 @@ class GeminiQuizService with ChangeNotifier {
   }
 
   Future<String> _extractTextFromBytes(Uint8List bytes) async {
+    if (kIsWeb) {
+      final doc = PdfDocument(inputBytes: bytes);
+      final text = PdfTextExtractor(doc).extractText();
+      doc.dispose();
+      return text;
+    }
     return await Isolate.run(() {
       final doc = PdfDocument(inputBytes: bytes);
       final text = PdfTextExtractor(doc).extractText();

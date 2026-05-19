@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/constant.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
+import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_dialog.dart';
 import 'package:flutter_pomodoro/providers/quiz_generator.dart';
@@ -31,6 +33,18 @@ class _PinchPageState extends State<PinchPage> {
   late DateTime endTime = DateTime.now().add(learnDuration);
   String remainingTime = '';
   bool hideFloatingButton = false;
+  Timer? _pageChangeDebounce;
+
+  PomodoroPreset _getCurrentPomodoroPreset() {
+  final settings = QuizStorageService();
+
+  final savedLabel = settings.loadPomodoroPreset();
+
+  return pomodoroPresets.firstWhere(
+    (preset) => preset.label == savedLabel,
+    orElse: () => pomodoroPresets.first,
+  );
+}
 
   @override
   @override
@@ -75,23 +89,40 @@ class _PinchPageState extends State<PinchPage> {
   }
 
   void startTimer() {
-    BuildContext navContext = NavigationService.navigatorKey.currentContext!;
-    endTime = DateTime.now().add(learnDuration);
-    timer = Timer(learnDuration, () {
+    BuildContext navContext =
+        NavigationService.navigatorKey.currentContext!;
+
+    final preset = _getCurrentPomodoroPreset();
+
+    final studyDuration = preset.studyDuration;
+
+    endTime = DateTime.now().add(studyDuration);
+
+    timer = Timer(studyDuration, () {
       showBreakTime(navContext);
+
       setState(() {
         hideFloatingButton = true;
       });
     });
-    timerDisplay = Timer.periodic(Duration(seconds: 1), (currentTime) {
-      setState(() {
-        int remaining = endTime.difference(DateTime.now()).inSeconds;
-        if (remaining < 1) {
-          timerDisplay.cancel();
-        }
-        remainingTime = formatDuration(remaining).toString();
-      });
-    });
+
+    timerDisplay = Timer.periodic(
+      const Duration(seconds: 1),
+      (currentTime) {
+        setState(() {
+          int remaining =
+              endTime.difference(DateTime.now()).inSeconds;
+
+          if (remaining < 1) {
+            timerDisplay.cancel();
+          }
+
+          remainingTime =
+              formatDuration(remaining).toString();
+        });
+      },
+    );
+
     setState(() {
       hideFloatingButton = false;
     });
@@ -110,19 +141,22 @@ class _PinchPageState extends State<PinchPage> {
 
   @override
   void dispose() {
+    _pageChangeDebounce?.cancel();
     timer.cancel();
     timerDisplay.cancel();
-    // Remove listener BEFORE disposing controller
     _pdfControllerPinch?.removeListener(_onPageChanged);
     _pdfControllerPinch?.dispose();
     super.dispose();
   }
   
   void _onPageChanged() {
-    Provider.of<MyFile>(
-      NavigationService.navigatorKey.currentContext!,
-      listen: false,
-    ).setPage(_pdfControllerPinch!.page);
+    _pageChangeDebounce?.cancel();
+    _pageChangeDebounce = Timer(const Duration(milliseconds: 300), () {
+      Provider.of<MyFile>(
+        NavigationService.navigatorKey.currentContext!,
+        listen: false,
+      ).setPage(_pdfControllerPinch!.page);
+    });
   }
 
   @override

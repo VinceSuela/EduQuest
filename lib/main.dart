@@ -40,6 +40,7 @@ Future<void> main() async {
   await Future.wait([
     Hive.openBox<QuizSession>('quiz_sessions'),
     Hive.openBox('user_stats'),
+    Hive.openBox('quiz_cache'),
   ]);
 
   app = await Firebase.initializeApp(

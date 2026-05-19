@@ -19,6 +19,7 @@ class QuizStorageService {
   // Hive box names
   static const String _sessionsBox = 'quiz_sessions';
   static const String _statsBox = 'user_stats';
+  static const String _quizCacheBox = 'quiz_cache';
 
   // Lifetime stat keys (persist across app usage)
   static const String keyTotalAnswered = 'total_answered';
@@ -27,6 +28,8 @@ class QuizStorageService {
   static const String keyCurrentStreak = 'current_streak';
   static const String keyLastSessionDate = 'last_session_date';
   static const String keyTotalPomodoros = 'total_pomodoros';
+  static const String keyDifficulty = 'quiz_difficulty';
+  static const String keyPomodoroPreset = 'pomodoro_preset';
 
   // Weekly stat keys (reset every week, used for leaderboard)
   static const String keyWeeklyData = 'weekly_data';
@@ -38,6 +41,7 @@ class QuizStorageService {
 
   Box<QuizSession> get _sessions => Hive.box<QuizSession>(_sessionsBox);
   Box get _stats => Hive.box(_statsBox);
+  Box get _quizCache => Hive.box(_quizCacheBox);
 
   // MAIN ENTRY POINTS
 
@@ -56,6 +60,23 @@ class QuizStorageService {
     await _pushToFirestoreIfDue(); // step 5: sync if week rolled over
   }
 
+  Future<void> cacheQuestions(String pdfHash, List<dynamic> questionsJson) async {
+    await _quizCache.put(pdfHash, {
+      'questions': questionsJson,
+      'cachedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  List<dynamic>? getCachedQuestions(String pdfHash) {
+    final data = _quizCache.get(pdfHash) as Map?;
+    return data?['questions'] as List<dynamic>?;
+  }
+
+  // Call this when a quiz is generated from a PDF. 
+  Future<void> removeCachedQuestions(String pdfHash) async {
+    await _quizCache.delete(pdfHash);
+  }
+
   // Call from pomodoro_timer.dart when a Pomodoro cycle completes.
   Future<void> recordPomodoroComplete() async {
     await _resetWeeklyStatsIfDue();
@@ -69,6 +90,23 @@ class QuizStorageService {
     weekly['pomodorosThisWeek'] =
         ((weekly['pomodorosThisWeek'] as int?) ?? 0) + 1;
     await _saveWeeklyData(weekly);
+  }
+
+  // User preferences
+  Future<void> saveDifficulty(String difficulty) async {
+    await _stats.put(keyDifficulty, difficulty);
+  }
+
+  String loadDifficulty() {
+    return _stats.get(keyDifficulty, defaultValue: 'medium');
+  }
+
+  Future<void> savePomodoroPreset(String preset) async {
+    await _stats.put(keyPomodoroPreset, preset);
+  }
+
+  String loadPomodoroPreset() {
+    return _stats.get(keyPomodoroPreset, defaultValue: '25:5');
   }
 
   // SESSION CRUD
