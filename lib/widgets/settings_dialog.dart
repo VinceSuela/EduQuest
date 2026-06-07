@@ -1,5 +1,4 @@
 // lib/widgets/settings_dialog.dart
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

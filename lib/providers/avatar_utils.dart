@@ -25,7 +25,7 @@ String _letterToHex(String letter) =>
 Color colorFromName(String name) {
   final clean = name.replaceAll(RegExp(r'[^a-zA-Z]'), '');
   if (clean.isEmpty) return const Color(0xFF888888);
-  final r = _letterToHex(clean.length > 0 ? clean[0] : 'M');
+  final r = _letterToHex(clean.isNotEmpty ? clean[0] : 'M');
   final g = _letterToHex(clean.length > 1 ? clean[1] : 'M');
   final b = _letterToHex(clean.length > 2 ? clean[2] : 'M');
   final hex = '$r$r$g$g$b$b';
@@ -75,7 +75,7 @@ class AvatarWidget extends StatelessWidget {
         ? Image.asset(
             avatarAssetPath!,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
+            errorBuilder: (_, _, _) =>
                 _InitialsInner(initials: initials, bg: bg, size: size),
           )
         : _InitialsInner(initials: initials, bg: bg, size: size);

@@ -1,7 +1,5 @@
 // lib/providers/quiz_generator.dart
 import 'dart:convert';
-import 'dart:isolate';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro/constant.dart';
 import 'package:flutter_pomodoro/services/api_key_service.dart';
@@ -106,12 +104,14 @@ class GeminiQuizService with ChangeNotifier {
       doc.dispose();
       return text;
     }
-    return await Isolate.run(() {
-      final doc = PdfDocument(inputBytes: bytes);
-      final text = PdfTextExtractor(doc).extractText();
-      doc.dispose();
-      return text;
-    });
+    return await compute(_extractText, bytes);
+  }
+
+  String _extractText(Uint8List bytes) {
+    final doc = PdfDocument(inputBytes: bytes);
+    final text = PdfTextExtractor(doc).extractText();
+    doc.dispose();
+    return text;
   }
 }
 

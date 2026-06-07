@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/leaderboard_page.dart';
 import 'package:flutter_pomodoro/providers/avatar_utils.dart';
 import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
@@ -22,7 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _weekLabel = QuizStorageService().currentWeekLabel; // computed once
+    _weekLabel = QuizStorageService().currentWeekLabel; // computed once on init
     _leaderStream = FirebaseFirestore.instance
         .collection('leaderboard')
         .doc('weekly')
@@ -58,6 +59,25 @@ class _MyHomePageState extends State<MyHomePage> {
           }
 
           final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isNotEmpty) {
+            storage.cacheLeaderboard(
+              docs
+                  .map((d) => Map<String, dynamic>.from(d.data() as Map))
+                  .toList(),
+            );
+          }
+
+          final entries = docs.isNotEmpty
+              ? docs.map((d) => LeaderboardEntry.fromFirestore(d.data() as Map<String, dynamic>, docs.indexOf(d) + 1, currentUid)).toList()
+              : storage.getCachedLeaderboard()
+                    .asMap().entries
+                    .map((e) => LeaderboardEntry.fromFirestore(e.value, e.key + 1, currentUid))
+                    .toList();
+
+          if (entries.isEmpty && snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           final allUsers = docs.asMap().entries.map((entry) {
             final index = entry.key;

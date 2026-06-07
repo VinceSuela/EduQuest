@@ -30,6 +30,61 @@ import 'package:flutter_pomodoro/leaderboard_page.dart';
 bool shouldUseFirebaseEmulator = false;
 late final FirebaseApp app;
 late final FirebaseAuth auth;
+
+Future<void> _precacheAvatars(BuildContext context) async {
+  final avatars = [
+    'assets/images/avatars/boy.png',
+    'assets/images/avatars/boy1.png',
+    'assets/images/avatars/boy2.png',
+    'assets/images/avatars/boy3.png',
+    'assets/images/avatars/boy4.png',
+    'assets/images/avatars/boy5.png',
+    'assets/images/avatars/boy6.png',
+    'assets/images/avatars/boy7.png',
+    'assets/images/avatars/boy8.png',
+    'assets/images/avatars/boy9.png',
+    'assets/images/avatars/girl.png',
+    'assets/images/avatars/girl1.png',
+    'assets/images/avatars/girl2.png',
+    'assets/images/avatars/girl3.png',
+    'assets/images/avatars/girl4.png',
+    'assets/images/avatars/girl5.png',
+    'assets/images/avatars/girl6.png',
+    'assets/images/avatars/girl7.png',
+    'assets/images/avatars/girl8.png',
+    'assets/images/avatars/girl9.png',
+    'assets/images/avatars/girl10.png',
+    'assets/images/avatars/girl11.png',
+    'assets/images/avatars/girl12.png',
+    'assets/images/avatars/girl13.png',
+    'assets/images/avatars/avatar.png',
+    'assets/images/avatars/man.png',
+    'assets/images/avatars/bear.png',
+    'assets/images/avatars/bee.png',
+    'assets/images/avatars/dog.png',
+    'assets/images/avatars/turtle.png',
+    'assets/images/avatars/happy.png',
+    'assets/images/avatars/frog.png',
+    'assets/images/avatars/virgo.png',
+    'assets/images/avatars/young-boy.png',
+    'assets/images/avatars/student.png',
+    'assets/images/avatars/student1.png',
+    'assets/images/avatars/koala.png',
+    'assets/images/avatars/lion.png',
+  ];
+  for (final path in avatars) {
+    await precacheImage(AssetImage(path), context);
+  }
+}
+
+Future<void> _compactHiveIfNeeded() async {
+  await Hive.box<QuizSession>('quiz_sessions').compact();
+  await Hive.box('user_stats').compact();
+  await Hive.box('quiz_cache').compact();
+  await Hive.box('pdf_cache').compact();
+  await Hive.box('leaderboard_cache').compact();
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -41,7 +96,11 @@ Future<void> main() async {
     Hive.openBox<QuizSession>('quiz_sessions'),
     Hive.openBox('user_stats'),
     Hive.openBox('quiz_cache'),
+    Hive.openBox('pdf_cache'),
+    Hive.openBox('leaderboard_cache'),
   ]);
+
+  await _compactHiveIfNeeded();
 
   app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -85,6 +144,9 @@ class _MyAppState extends State<MyApp> {
     // Provider.of<MyUser>(context).googleSignIn.silentSignIn();
     // _googleSignIn.silentSignIn();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _precacheAvatars(context);
+    });
   }
 
   @override

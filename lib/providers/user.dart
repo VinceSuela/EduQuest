@@ -1,8 +1,10 @@
 // lib/providers/user.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pomodoro/services/api_key_service.dart';
+import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 import 'package:unique_names_generator/unique_names_generator.dart';
 
 class MyUser with ChangeNotifier {
@@ -29,13 +31,22 @@ class MyUser with ChangeNotifier {
 
     email = user.email ?? '';
 
+   final storage = QuizStorageService();
+    username = storage.cachedDisplayName.isNotEmpty
+        ? storage.cachedDisplayName
+        : email;
+    notifyListeners();
 
     try {
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-      username = doc.data()?['displayName'] as String? ?? email;
+      final name = doc.data()?['displayName'] as String? ?? email;
+      final photo = doc.data()?['photoURL'] as String? ?? '';
+      username = name;
+      storage.saveUserProfile(name, photo);
+      notifyListeners();
     } catch (_) {
       username = user.displayName ?? email;
     }

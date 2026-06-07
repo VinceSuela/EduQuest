@@ -11,7 +11,7 @@ class MyQuizDialog extends StatelessWidget {
     return Container(
       color: Colors.transparent,
       child: SizedBox(
-        height: 800,
+        height: MediaQuery.of(context).size.height * 0.85,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -57,7 +57,6 @@ class MyQuizDialog extends StatelessWidget {
                     child: Card(
                       child: SizedBox(
                         width: .infinity,
-                        height: 200,
                         child: Column(children: [Expanded(child: child)]),
                       ),
                     ),

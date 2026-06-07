@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/constant.dart';
@@ -9,7 +8,6 @@ import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_dialog.dart';
-import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_pomodoro/services/quiz_service.dart';
@@ -34,22 +32,31 @@ class _PinchPageState extends State<PinchPage> {
   String remainingTime = '';
   bool hideFloatingButton = false;
   Timer? _pageChangeDebounce;
+  MyFile? _fileProvider;
 
   PomodoroPreset _getCurrentPomodoroPreset() {
   final settings = QuizStorageService();
 
-  final savedLabel = settings.loadPomodoroPreset();
+    final savedLabel = settings.loadPomodoroPreset();
 
-  return pomodoroPresets.firstWhere(
-    (preset) => preset.label == savedLabel,
-    orElse: () => pomodoroPresets.first,
-  );
-}
+    return pomodoroPresets.firstWhere(
+      (preset) => preset.label == savedLabel,
+      orElse: () => pomodoroPresets.first,
+    );
+  }
 
   @override
   @override
   void initState() {
     super.initState();
+
+    // Listen to MyFile provider to know when bytes are ready, then initialize PDF controller
+    _fileProvider = Provider.of<MyFile>(
+      NavigationService.navigatorKey.currentContext!,
+      listen: false,
+    );
+    _fileProvider!.addListener(_onFileProviderChanged);
+
     // Start timers and basic logic
     startTimer();
 
@@ -57,36 +64,41 @@ class _PinchPageState extends State<PinchPage> {
     _preparePdf();
   }
 
-  Future<void> _preparePdf() async {
-    final BuildContext navContext =
-        NavigationService.navigatorKey.currentContext!;
-    final fileProvider = Provider.of<MyFile>(navContext, listen: false);
-
-    setState(() {
-      // Show loading state while preparing PDF
-      if (fileProvider.bytes.isNotEmpty) {
-        _pdfControllerPinch = PdfControllerPinch(
-          document: PdfDocument.openData(fileProvider.bytes),
-          initialPage: fileProvider.page,
-        );
-      } else if (!kIsWeb && fileProvider.path.isNotEmpty) {
-        // Fallback for native platforms with a valid file path
-        _pdfControllerPinch = PdfControllerPinch(
-          document: PdfDocument.openFile(fileProvider.path),
-          initialPage: fileProvider.page,
-        );
-      } else {
-        // Nothing to open — navigate back rather than crash
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacementNamed(navContext, '/home');
-        });
-        return;
-      }
-      
-      _pdfControllerPinch!.addListener(_onPageChanged);
-      
-    });
+  void _onFileProviderChanged() {
+    if (_pdfControllerPinch == null && 
+        (_fileProvider?.bytes.isNotEmpty ?? false )) {
+      _preparePdf();
+    }
   }
+
+  Future<void> _preparePdf() async {
+    final fileProvider = _fileProvider ?? Provider.of<MyFile>(
+      NavigationService.navigatorKey.currentContext!,
+      listen: false,
+    );
+
+    if (fileProvider.isLoading || fileProvider.bytes.isEmpty) return;
+
+    // Always use bytes — covers web, Android, iOS, and Firestore blobs
+    final controller = PdfControllerPinch(
+      document: PdfDocument.openData(fileProvider.bytes),
+      initialPage: fileProvider.page,
+    );
+    controller.addListener(_onPageChanged);
+
+    if (mounted) {
+      setState(() => _pdfControllerPinch = controller);
+    }
+  }
+
+  // void _onBytesReady() {
+  //   final navContext = NavigationService.navigatorKey.currentContext!;
+  //   final fileProvider = Provider.of<MyFile>(navContext, listen: false);
+  //   if (!fileProvider.isLoading && fileProvider.bytes.isNotEmpty) {
+  //     fileProvider.removeListener(_onBytesReady);
+  //     _preparePdf();
+  //   }
+  // }
 
   void startTimer() {
     BuildContext navContext =
@@ -96,9 +108,9 @@ class _PinchPageState extends State<PinchPage> {
 
     final studyDuration = preset.studyDuration;
 
-    endTime = DateTime.now().add(studyDuration);
+    endTime = DateTime.now().add(learnDuration);
 
-    timer = Timer(studyDuration, () {
+    timer = Timer(learnDuration, () {
       showBreakTime(navContext);
 
       setState(() {
@@ -141,6 +153,8 @@ class _PinchPageState extends State<PinchPage> {
 
   @override
   void dispose() {
+    _fileProvider?.removeListener(_onFileProviderChanged);
+    _fileProvider = null;
     _pageChangeDebounce?.cancel();
     timer.cancel();
     timerDisplay.cancel();
@@ -152,18 +166,35 @@ class _PinchPageState extends State<PinchPage> {
   void _onPageChanged() {
     _pageChangeDebounce?.cancel();
     _pageChangeDebounce = Timer(const Duration(milliseconds: 300), () {
-      Provider.of<MyFile>(
-        NavigationService.navigatorKey.currentContext!,
-        listen: false,
-      ).setPage(_pdfControllerPinch!.page);
+      _fileProvider?.setPage(_pdfControllerPinch!.page);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (Provider.of<MyFile>(context).name.isEmpty) {
-      Navigator.pushReplacementNamed(context, '/home');
+    final file = Provider.of<MyFile>(context);
+
+    // If provider has an error, show it
+    if (file.hasError) {
+      return Scaffold(
+        body: Center(child: Text(file.errorMessage ?? 'Something went wrong')),
+      );
     }
+
+    if (file.isLoading || _pdfControllerPinch == null) {
+      return const Scaffold(
+        backgroundColor: Colors.grey,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
+
+    // If no name yet, show loading (happens during background fetch)
+    if (file.name.isEmpty) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey,
       appBar: AppBar(
@@ -173,7 +204,7 @@ class _PinchPageState extends State<PinchPage> {
               fit: .scaleDown,
               child: Text(Provider.of<MyFile>(context).name),
             ),
-            FittedBox(fit: .scaleDown, child: Text(remainingTime)),
+            FittedBox(fit: .scaleDown, child: _TimerDisplay(endTime: endTime),),
           ],
         ),
         leading: IconButton(
@@ -394,4 +425,53 @@ class _PinchPageState extends State<PinchPage> {
       ),
     );
   }
+}
+
+class _TimerDisplay extends StatefulWidget {
+  final DateTime endTime;
+  const _TimerDisplay({required this.endTime});
+
+  @override
+  State<_TimerDisplay> createState() => _TimerDisplayState();
+}
+
+class _TimerDisplayState extends State<_TimerDisplay> {
+  late Timer _ticker;
+  String _remaining = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _tick();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  @override
+  void didUpdateWidget(_TimerDisplay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.endTime != widget.endTime) {
+      _tick();
+    }
+  }
+
+  void _tick() {
+    final secs = widget.endTime.difference(DateTime.now()).inSeconds;
+    if (mounted) setState(() => _remaining = _format(secs.clamp(0, 9999)));
+  }
+
+  String _format(int s) {
+    final m = s ~/ 60;
+    final sec = s % 60;
+    return '${m.toString().padLeft(2, '0')}:${sec.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void dispose() {
+    _ticker.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(_remaining, style: const TextStyle(fontSize: 14));
 }

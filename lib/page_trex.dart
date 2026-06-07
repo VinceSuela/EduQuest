@@ -30,7 +30,7 @@ class _TrexGamePageState extends State<TrexGamePage> {
     BuildContext navContext = NavigationService.navigatorKey.currentContext!;
     final preset = _getCurrentPomodoroPreset();
     final gameBreak = preset.breakDuration;
-    timer = Timer(gameBreak, () {
+    timer = Timer(gameDuration, () {
       Navigator.pushReplacementNamed(navContext, '/pdfViewer');
     });
   }

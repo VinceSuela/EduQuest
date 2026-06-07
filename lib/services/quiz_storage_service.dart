@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '../models/quiz_session.dart';
 
@@ -20,6 +21,8 @@ class QuizStorageService {
   static const String _sessionsBox = 'quiz_sessions';
   static const String _statsBox = 'user_stats';
   static const String _quizCacheBox = 'quiz_cache';
+  static const String _leaderboardCacheKey = 'leaderboard_cache';
+  static const String _pdfCacheBox = 'pdf_cache';
 
   // Lifetime stat keys (persist across app usage)
   static const String keyTotalAnswered = 'total_answered';
@@ -39,9 +42,25 @@ class QuizStorageService {
   // Weekly data JSON structure:
   static const int _phtOffsetHours = 8;
 
+  // Firestore field names (for consistency in leaderboard documents)
+  static const String keyDisplayName = 'display_name';
+  static const String keyPhotoURL    = 'photo_url';
+
+  void saveUserProfile(String displayName, String photoURL) {
+    _stats.put(keyDisplayName, displayName);
+    _stats.put(keyPhotoURL, photoURL);
+  }
+
+  String get cachedDisplayName => 
+    _stats.get(keyDisplayName, defaultValue: '') as String;
+
+  String get cachedPhotoURL =>
+    _stats.get(keyPhotoURL, defaultValue: '') as String;
+
   Box<QuizSession> get _sessions => Hive.box<QuizSession>(_sessionsBox);
   Box get _stats => Hive.box(_statsBox);
   Box get _quizCache => Hive.box(_quizCacheBox);
+  Box get _pdfCache => Hive.box(_pdfCacheBox);
 
   // MAIN ENTRY POINTS
 
@@ -65,6 +84,22 @@ class QuizStorageService {
       'questions': questionsJson,
       'cachedAt': DateTime.now().toIso8601String(),
     });
+
+    // Evict oldest entries if cache exceeds 30 PDFs
+    if (_quizCache.length > 30) {
+      final entries = _quizCache.toMap().entries.toList();
+      // Sort by cachedAt ascending (oldest first)
+      entries.sort((a, b) {
+        final aDate = (a.value as Map)['cachedAt'] as String? ?? '';
+        final bDate = (b.value as Map)['cachedAt'] as String? ?? '';
+        return aDate.compareTo(bDate);
+      });
+      // Delete oldest until we're at 25
+      final toDelete = entries.take(entries.length - 25);
+      for (final entry in toDelete) {
+        await _quizCache.delete(entry.key);
+      }
+    }
   }
 
   List<dynamic>? getCachedQuestions(String pdfHash) {
@@ -76,6 +111,45 @@ class QuizStorageService {
   Future<void> removeCachedQuestions(String pdfHash) async {
     await _quizCache.delete(pdfHash);
   }
+
+  // Caching PDF bytes for quiz generation to optimize repeat quiz attempts from the same file.
+  Future<void> cachePdfBytes(String pdfHash, Uint8List bytes) async {
+    // Store as base64 string — Hive stores this natively without any adapter
+    await _pdfCache.put(pdfHash, {
+      'data': base64Encode(bytes),
+      'cachedAt': DateTime.now().toIso8601String(),
+    });
+  
+    // Evict oldest if cache exceeds 10 PDFs (PDFs are large — keep limit low)
+    if (_pdfCache.length > 10) {
+      final entries = _pdfCache.toMap().entries.toList();
+      entries.sort((a, b) {
+        final aDate = (a.value as Map)['cachedAt'] as String? ?? '';
+        final bDate = (b.value as Map)['cachedAt'] as String? ?? '';
+        return aDate.compareTo(bDate);
+      });
+      final toDelete = entries.take(entries.length - 8);
+      for (final entry in toDelete) {
+        await _pdfCache.delete(entry.key);
+      }
+    }
+  }
+  
+  Uint8List? getCachedPdfBytes(String pdfHash) {
+    final raw = _pdfCache.get(pdfHash) as Map?;
+    final encoded = raw?['data'] as String?;
+    if (encoded == null) return null;
+    try {
+      return base64Decode(encoded);
+    } catch (_) {
+      return null;
+    }
+  }
+  
+  Future<void> removeCachedPdf(String pdfHash) async {
+    await _pdfCache.delete(pdfHash);
+  }
+
 
   // Call from pomodoro_timer.dart when a Pomodoro cycle completes.
   Future<void> recordPomodoroComplete() async {
@@ -122,6 +196,40 @@ class QuizStorageService {
   Future<void> clearAllSessions() async {
     await _sessions.clear();
     await _stats.clear();
+  }
+
+  // LEADERBOARD CACHE (for leaderboard page optimizations)
+  void cacheLeaderboard(List<Map<String, dynamic>> entries) {
+    final safeEntries = _makeEncodable(entries);
+    _stats.put(_leaderboardCacheKey, jsonEncode(safeEntries));
+  }
+
+  dynamic _makeEncodable(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate().toIso8601String();
+    }
+
+    if (value is Map) {
+      return value.map(
+        (k, v) => MapEntry(k.toString(), _makeEncodable(v)),
+      );
+    }
+
+    if (value is List) {
+      return value.map(_makeEncodable).toList();
+    }
+
+    return value;
+  }
+
+  List<Map<String, dynamic>> getCachedLeaderboard() {
+    final raw = _stats.get(_leaderboardCacheKey) as String?;
+    if (raw == null) return [];
+    try {
+      return (jsonDecode(raw) as List)
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    } catch (_) { return []; }
   }
 
   // STATS & LEADERBOARD LOGIC
@@ -298,7 +406,7 @@ class QuizStorageService {
         _currentWeekStartPHT.toIso8601String(),
       );
     } catch (e) {
-      print('Leaderboard push failed: $e');
+      if (kDebugMode) debugPrint('Leaderboard push failed: $e');
     }
   }
   // Pushes the quiz session results to Firestore for leaderboard consideration, if the weekly push is due.

@@ -1,6 +1,5 @@
 // lib/services/quiz_service.dart
 import 'dart:developer';
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -10,9 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
-import 'package:flutter_pomodoro/models/quiz_question.dart';
 import 'package:crypto/crypto.dart';
-import 'dart:convert';
 
 Future<String> generatePdfHashAsync(Uint8List bytes) async {
   if (kIsWeb) {
@@ -79,7 +76,7 @@ Future<void> generateQuizFromPdf(BuildContext context) async {
           .doc(pdfHash)
           .get();
     } catch (e) {
-      log('Firestore cache read failed: $e');
+      if (kDebugMode) print('Firestore cache read failed: $e');
       existingDoc = null;
     }
 
@@ -139,14 +136,14 @@ Future<void> generateQuizFromPdf(BuildContext context) async {
     } catch (e) {
       // Firestore save failed — still let the user take the quiz.
       // It just won't be cached for next time.
-      log('Firestore save failed (non-fatal): $e');
+      if (kDebugMode) print('Firestore save failed (non-fatal): $e');
     }
 
     _dismissLoading(navContext);
     Navigator.pushReplacementNamed(navContext, '/quiz');
 
   } catch (e, stack) {
-    log('Quiz Workflow Error: $e', stackTrace: stack);
+    if (kDebugMode) log('Quiz Workflow Error: $e', stackTrace: stack);
     _dismissLoading(navContext);
     _showErrorDialog(navContext,
       title: 'Something Went Wrong',
@@ -176,11 +173,16 @@ Future<void> _persistQuizData({
     'fileName':   fileName,
     'userEmail':  userEmail ?? 'Anonymous',
     'createdAt':  FieldValue.serverTimestamp(),
-    'aiResponse': aiResponse,
+    // 'aiResponse': aiResponse, // Optional: store raw AI response for debugging or future features
     'questions':  questions.map((q) => q.toJson()).toList(),
     'pdfSize':    pdfBytes.length,
-    'pdf':        pdfBytes.isNotEmpty ? Blob(pdfBytes) : null,
+    // 'pdf':        pdfBytes.isNotEmpty ? Blob(pdfBytes) : null,
     'pdfHash':    pdfHash,
+  });
+
+  await docRef.collection('blob').doc('data').set({
+    'pdf': pdfBytes.isNotEmpty ? Blob(pdfBytes) : null,
+    'aiResponse': aiResponse,
   });
 }
 

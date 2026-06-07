@@ -158,7 +158,9 @@ No markdown.
 No explanations.
 No extra text.
 
-10. Generate exactly 10 questions.
+10. Generate at least 10 questions, and depending on the quantity of the content, you can generate more up to 40.
+
+11. Generate exactly 4 options per question.
 
 JSON SCHEMA:
 [
@@ -202,7 +204,7 @@ Rules:
 
     Quality: Ensure all distractors (wrong answers) are plausible based on the context of the document.
 
-    Quantity: Generate 10 questions depending on the quantity of the content.  
+    Quantity: Generate at least 10 questions, and depending on the quantity of the content, you can generate more up to 40.
 
 ''';
 

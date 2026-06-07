@@ -218,7 +218,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                         : ListView.separated(
                             padding: const EdgeInsets.only(top: 8, bottom: 80),
                             itemCount: rest.length,
-                            separatorBuilder: (_, __) => Divider(
+                            separatorBuilder: (_, _) => Divider(
                               height: 1,
                               indent: 72,
                               endIndent: 16,

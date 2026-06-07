@@ -1,5 +1,6 @@
 // lib/quiz_page.dart
 import 'dart:math';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/models/quiz_question.dart';
 import 'package:flutter_pomodoro/models/quiz_session.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_pomodoro/providers/my_file.dart';
 import 'package:flutter_pomodoro/providers/quiz_generator.dart';
 import 'package:flutter_pomodoro/services/navigation_service.dart';
 import 'package:flutter_pomodoro/services/quiz_storage_service.dart';
-import 'package:flutter_pomodoro/services/quiz_service.dart';
 import 'package:flutter_pomodoro/widgets/layout.dart';
 import 'package:flutter_pomodoro/widgets/my_button.dart';
 import 'package:flutter_pomodoro/widgets/my_quiz_dialog.dart';
@@ -251,10 +251,12 @@ class _MyQuizState extends State<MyQuiz> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
-              child: Text(
+              child: AutoSizeText(
                 getQuizQuestion.getQuestion,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
+                maxLines: 8,
+                minFontSize: 12,
+                style: Theme.of(context).textTheme.bodyLarge!,
               ),
             ),
           ),
@@ -283,10 +285,12 @@ class _MyQuizState extends State<MyQuiz> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Center(
-                        child: Text(
+                        child: AutoSizeText(
                           buttonLabel,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 15),
+                          maxLines: 4,
+                          minFontSize: 12,
+                          style: Theme.of(context).textTheme.bodyLarge!,
                         ),
                       ),
                     ),
